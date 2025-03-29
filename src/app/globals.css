@@ -2,26 +2,193 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Olive Green Colors */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --olive-50: #f5f7f0;
+  --olive-100: #e6eadb;
+  --olive-200: #d0d8bd;
+  --olive-300: #b5c49a;
+  --olive-400: #9aaf7c;
+  --olive-500: #7f9963;
+  --olive-600: #667a50;
+  --olive-700: #4d5c3b;
+  --olive-800: #3a442d;
+  --olive-900: #282e1e;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Add custom olive styles */
+.bg-olive-50 {
+  background-color: var(--olive-50);
 }
 
+.bg-olive-100 {
+  background-color: var(--olive-100);
+}
+
+.bg-olive-200 {
+  background-color: var(--olive-200);
+}
+
+.bg-olive-300 {
+  background-color: var(--olive-300);
+}
+
+.bg-olive-400 {
+  background-color: var(--olive-400);
+}
+
+.bg-olive-500 {
+  background-color: var(--olive-500);
+}
+
+.bg-olive-600 {
+  background-color: var(--olive-600);
+}
+
+.bg-olive-700 {
+  background-color: var(--olive-700);
+}
+
+.bg-olive-800 {
+  background-color: var(--olive-800);
+}
+
+.bg-olive-900 {
+  background-color: var(--olive-900);
+}
+
+.text-olive-50 {
+  color: var(--olive-50);
+}
+
+.text-olive-100 {
+  color: var(--olive-100);
+}
+
+.text-olive-200 {
+  color: var(--olive-200);
+}
+
+.text-olive-300 {
+  color: var(--olive-300);
+}
+
+.text-olive-400 {
+  color: var(--olive-400);
+}
+
+.text-olive-500 {
+  color: var(--olive-500);
+}
+
+.text-olive-600 {
+  color: var(--olive-600);
+}
+
+.text-olive-700 {
+  color: var(--olive-700);
+}
+
+.text-olive-800 {
+  color: var(--olive-800);
+}
+
+.text-olive-900 {
+  color: var(--olive-900);
+}
+
+.border-olive-50 {
+  border-color: var(--olive-50);
+}
+
+.border-olive-100 {
+  border-color: var(--olive-100);
+}
+
+.border-olive-200 {
+  border-color: var(--olive-200);
+}
+
+.border-olive-300 {
+  border-color: var(--olive-300);
+}
+
+.border-olive-400 {
+  border-color: var(--olive-400);
+}
+
+.border-olive-500 {
+  border-color: var(--olive-500);
+}
+
+.border-olive-600 {
+  border-color: var(--olive-600);
+}
+
+.border-olive-700 {
+  border-color: var(--olive-700);
+}
+
+.border-olive-800 {
+  border-color: var(--olive-800);
+}
+
+.border-olive-900 {
+  border-color: var(--olive-900);
+}
+
+.hover\:bg-olive-50:hover {
+  background-color: var(--olive-50);
+}
+
+.hover\:bg-olive-100:hover {
+  background-color: var(--olive-100);
+}
+
+.hover\:bg-olive-200:hover {
+  background-color: var(--olive-200);
+}
+
+.hover\:bg-olive-300:hover {
+  background-color: var(--olive-300);
+}
+
+.hover\:bg-olive-600:hover {
+  background-color: var(--olive-600);
+}
+
+.hover\:bg-olive-700:hover {
+  background-color: var(--olive-700);
+}
+
+.fill-olive-500 {
+  fill: var(--olive-500);
+}
+
+.fill-olive-600 {
+  fill: var(--olive-600);
+}
+
+.focus\:ring-olive-200:focus {
+  --tw-ring-color: var(--olive-200);
+}
+
+/* Additional global styles */
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', sans-serif;
+  @apply bg-olive-50;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Georgia', serif;
+}
+
+/* Layout adjustments for sidebar */
+.main-content {
+  @apply ml-16 md:ml-64;
 }
