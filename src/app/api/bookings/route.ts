@@ -5,6 +5,8 @@ import { validateLicense } from "@/lib/utils/license-validator";
 import { Booking, CreateBookingInput } from "@/types/booking.types";
 import { computeBookingsWithSessionDate } from "@/lib/utils/bookings";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = cookies();

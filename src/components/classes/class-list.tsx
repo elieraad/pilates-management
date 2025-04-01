@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useClasses } from "@/lib/hooks/use-classes";
 import { Class, ClassSession } from "@/types/class.types";
@@ -25,7 +25,13 @@ import ClassWizard from "./class-wizzard";
 import EditSeriesModal from "./edit-series-modal";
 import DeleteSeriesModal from "./delete-series-modal";
 
-const Dropdown = ({ trigger, children }) => {
+const Dropdown = ({
+  trigger,
+  children,
+}: {
+  trigger: ReactNode;
+  children: ReactNode;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Close the dropdown when clicking outside
@@ -65,7 +71,15 @@ const Dropdown = ({ trigger, children }) => {
   );
 };
 // Add a DropdownItem component for menu items
-const DropdownItem = ({ onClick, children, className = "" }) => (
+const DropdownItem = ({
+  onClick,
+  children,
+  className = "",
+}: {
+  onClick: () => void;
+  children: ReactNode;
+  className?: string;
+}) => (
   <button
     onClick={(e) => {
       e.stopPropagation();
@@ -320,7 +334,15 @@ const ClassList = () => {
     sessionsByClass[session.class_id].push(session);
   });
 
-  const NestedDropdownItem = ({ label, icon: Icon, children }) => {
+  const NestedDropdownItem = ({
+    label,
+    icon: Icon,
+    children,
+  }: {
+    label: string;
+    icon: typeof Edit;
+    children: ReactNode;
+  }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [position, setPosition] = useState("right");
     const menuRef = useRef<HTMLDivElement>(null);
@@ -722,44 +744,46 @@ const ClassList = () => {
                         </div>
                       </div>
 
-                    {/* Class Sessions */}
-                    <div className="p-4">
-                      {!sessionsByClass[cls.id] ||
-                      sessionsByClass[cls.id].length === 0 ? (
-                        <div className="text-center py-4">
-                          <p className="text-gray-500">No sessions scheduled</p>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            className="mt-2"
-                            onClick={() => handleAddSession(cls)}
+                      {/* Class Sessions */}
+                      <div className="p-4">
+                        {!sessionsByClass[cls.id] ||
+                        sessionsByClass[cls.id].length === 0 ? (
+                          <div className="text-center py-4">
+                            <p className="text-gray-500">
+                              No sessions scheduled
+                            </p>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="mt-2"
+                              onClick={() => handleAddSession(cls)}
+                            >
+                              Add Session
+                            </Button>
+                          </div>
+                        ) : (
+                          <Table
+                            headers={[
+                              "Date",
+                              "Time",
+                              "Recurring",
+                              "Bookings",
+                              "Status",
+                              "Actions",
+                            ]}
                           >
-                            Add Session
-                          </Button>
-                        </div>
-                      ) : (
-                        <Table
-                          headers={[
-                            "Date",
-                            "Time",
-                            "Recurring",
-                            "Bookings",
-                            "Status",
-                            "Actions",
-                          ]}
-                        >
-                          {sessionsByClass[cls.id]
-                            .sort(
-                              (a, b) =>
-                                new Date(a.start_time).getTime() -
-                                new Date(b.start_time).getTime()
-                            )
-                            .map((session, i) => renderSession(session, i))}
-                        </Table>
-                      )}
+                            {sessionsByClass[cls.id]
+                              .sort(
+                                (a, b) =>
+                                  new Date(a.start_time).getTime() -
+                                  new Date(b.start_time).getTime()
+                              )
+                              .map((session, i) => renderSession(session, i))}
+                          </Table>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
             </div>
           ) : (
             <div className="text-center py-8">

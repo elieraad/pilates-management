@@ -21,8 +21,8 @@ const LoginForm = () => {
 
     try {
       await signIn(email, password);
-    } catch (err: any) {
-      setError(err.message || "Failed to sign in");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Failed to sign in");
     }
   };
 
@@ -86,7 +86,7 @@ const LoginForm = () => {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
+            {`Don't have an account?`}{" "}
             <Link href="/register" className="text-olive-600 hover:underline">
               Register here
             </Link>

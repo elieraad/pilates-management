@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 
 type PublicNavbarProps = {
   studioName: string;
@@ -23,7 +23,7 @@ const PublicNavbar = ({ studioName, studioLogo }: PublicNavbarProps) => {
           {/* Logo/Name */}
           <div className="flex items-center">
             {studioLogo ? (
-              <img
+              <Image
                 src={studioLogo}
                 alt={`${studioName} logo`}
                 className="h-8 w-8 rounded-full mr-2"

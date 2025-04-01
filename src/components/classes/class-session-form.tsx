@@ -43,7 +43,8 @@ const ClassSessionForm = ({
   >([
     {
       id: crypto.randomUUID(),
-      start_date: formatDateForInput(initialDate) || formatDateForInput(new Date()),
+      start_date:
+        formatDateForInput(initialDate) || formatDateForInput(new Date()),
       start_time: "09:00",
       is_recurring: false,
       recurrence_options: {
@@ -72,7 +73,7 @@ const ClassSessionForm = ({
   const handleSessionChange = (
     sessionId: string,
     field: string,
-    value: any
+    value: string | boolean
   ) => {
     setSessions((prev) =>
       prev.map((session) =>
@@ -92,7 +93,7 @@ const ClassSessionForm = ({
   const handleRecurrenceChange = (
     sessionId: string,
     field: string,
-    value: any
+    value: string | null
   ) => {
     setSessions((prev) =>
       prev.map((session) =>
@@ -216,15 +217,21 @@ const ClassSessionForm = ({
             class_id: formData.class_id,
             start_time: startDateTime.toISOString(),
             is_recurring: session.is_recurring,
-            recurring_pattern: session.is_recurring 
-              ? session.recurrence_options.pattern 
+            recurring_pattern: session.is_recurring
+              ? session.recurrence_options.pattern
               : undefined,
-            recurring_end_date: session.is_recurring && session.recurrence_options.endDate 
-              ? session.recurrence_options.endDate 
-              : undefined,
-            custom_recurrence: session.is_recurring && session.recurrence_options.pattern === "custom"
-              ? { daysOfWeek: session.recurrence_options.daysOfWeek }
-              : undefined,
+            recurring_end_date:
+              session.is_recurring && session.recurrence_options.endDate
+                ? session.recurrence_options.endDate
+                : undefined,
+            custom_recurrence:
+              session.is_recurring &&
+              session.recurrence_options.pattern === "custom"
+                ? {
+                    pattern: "custom",
+                    daysOfWeek: session.recurrence_options.daysOfWeek,
+                  }
+                : undefined,
           });
         })
       );
@@ -256,7 +263,9 @@ const ClassSessionForm = ({
         />
       )}
 
-      <h3 className="text-lg font-medium border-b pb-2 mb-4">Schedule Sessions</h3>
+      <h3 className="text-lg font-medium border-b pb-2 mb-4">
+        Schedule Sessions
+      </h3>
 
       {sessions.length === 0 ? (
         <div className="text-center bg-gray-50 p-6 rounded-lg mb-6">
@@ -275,7 +284,7 @@ const ClassSessionForm = ({
         <div>
           {sessions.map((session, index) => (
             <div
-              key={session.id}
+              key={index}
               className="p-4 border border-gray-200 rounded-lg relative mb-4"
             >
               {sessions.length > 1 && (
@@ -466,7 +475,11 @@ const ClassSessionForm = ({
         >
           Cancel
         </Button>
-        <Button type="submit" isLoading={isLoading} disabled={sessions.length === 0}>
+        <Button
+          type="submit"
+          isLoading={isLoading}
+          disabled={sessions.length === 0}
+        >
           {sessions.length > 1 ? "Create Sessions" : "Create Session"}
         </Button>
       </div>

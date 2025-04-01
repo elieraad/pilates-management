@@ -93,7 +93,7 @@ const ClassWizard = ({
   const handleSessionChange = (
     sessionId: string,
     field: string,
-    value: any
+    value: string | boolean
   ) => {
     setSessions((prev) =>
       prev.map((session) =>
@@ -113,7 +113,7 @@ const ClassWizard = ({
   const handleRecurrenceChange = (
     sessionId: string,
     field: string,
-    value: any
+    value: string | null
   ) => {
     setSessions((prev) =>
       prev.map((session) =>
@@ -450,7 +450,7 @@ const ClassWizard = ({
         <div>
           <h3 className="text-lg font-medium">Step 2: Schedule Sessions</h3>
           <p className="text-sm text-gray-500">
-            Add session times for "{classData.name}"
+            {`Add session times for "${classData.name}"`}
           </p>
         </div>
         <div className="flex items-center text-sm text-gray-500">
@@ -481,7 +481,7 @@ const ClassWizard = ({
         <div>
           {sessions.map((session, index) => (
             <div
-              key={session.id}
+              key={index}
               className="p-4 border border-gray-200 rounded-lg relative"
             >
               {sessions.length > 1 && (
@@ -720,7 +720,7 @@ const ClassWizard = ({
           <Check className="h-6 w-6 text-green-600" />
         </div>
         <h3 className="text-lg font-medium text-green-800 mb-2">
-          "{classData.name}" Created Successfully
+          {`"${classData.name}" Created Successfully`}
         </h3>
         <p className="text-green-600">
           {sessions.length} session{sessions.length !== 1 ? "s" : ""} scheduled

@@ -23,13 +23,6 @@ export default async function DashboardPage() {
     return null;
   }
 
-  // Get studio data
-  //   const { data: studio } = await supabase
-  //     .from("studios")
-  //     .select("*")
-  //     .eq("id", session.user.id)
-  //     .single();
-
   // Get current date for filtering today's classes
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -37,7 +30,7 @@ export default async function DashboardPage() {
   tomorrow.setDate(tomorrow.getDate() + 1);
 
   // Get upcoming classes for today
-  const { data: upcomingClasses } = await supabase
+  const { data: classes } = await supabase
     .from("class_sessions")
     .select(
       `
@@ -58,9 +51,12 @@ export default async function DashboardPage() {
     .lt("start_time", tomorrow.toISOString())
     .order("start_time", { ascending: true });
 
-  upcomingClasses?.forEach(
-    (d) => (d.bookings_count = d.bookings_count[0].count)
-  );
+  const upcomingClasses =
+    classes?.map((d) => ({
+      ...d,
+      bookings_count: d.bookings_count[0].count,
+      class: Array.isArray(d.class) ? d.class[0] : d.class,
+    })) || [];
 
   // Get recent bookings
   const { data: recentBookings } = await supabase
@@ -93,7 +89,7 @@ export default async function DashboardPage() {
         <StatsCards></StatsCards>
       </div>
 
-      <UpcomingClasses classes={upcomingClasses || []} />
+      <UpcomingClasses classes={upcomingClasses} />
 
       <RecentBookings bookings={recentBookings || []} />
     </div>

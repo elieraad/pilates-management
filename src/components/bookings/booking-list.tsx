@@ -110,7 +110,7 @@ const BookingList = () => {
   );
 
   // Fetch classes for the filter dropdown
-  const { data: classes, isLoading: isLoadingClasses } = useClassesQuery();
+  const { data: classes } = useClassesQuery();
 
   const cancelBooking = useCancelBookingMutation();
 
@@ -367,7 +367,7 @@ const BookingList = () => {
                     { value: "cancelled", label: "Cancelled" },
                   ]}
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  onChange={(e) => setStatusFilter(e.target.value as BookingStatus)}
                 />
 
                 <Select

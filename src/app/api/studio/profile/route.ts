@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { UpdateStudioInput } from "@/types/studio.types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const cookieStore = cookies();

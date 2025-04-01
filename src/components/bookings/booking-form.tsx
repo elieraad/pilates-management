@@ -3,15 +3,14 @@
 import { useState, useEffect } from "react";
 import { useBookings } from "@/lib/hooks/use-bookings";
 import { useClasses } from "@/lib/hooks/use-classes";
-import { Class, ClassSession } from "@/types/class.types";
+import { Class } from "@/types/class.types";
 import { BookingWithClient } from "@/types/booking.types";
 import Input from "../ui/input";
 import Select from "../ui/select";
 import Button from "../ui/button";
-import { formatDateTime } from "@/lib/utils/date-utils";
 
 type BookingFormProps = {
-  initialData?: BookingWithClient;
+  initialData: BookingWithClient;
   onSuccess?: () => void;
   onCancel?: () => void;
   preselectedClassId?: string;
@@ -44,39 +43,8 @@ const BookingForm = ({
     amount: initialData?.amount || 0,
   });
 
-  const [availableSessions, setAvailableSessions] = useState<ClassSession[]>(
-    []
-  );
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
-
-  // Fetch available sessions when class changes
-  useEffect(() => {
-    if (!formData.class_id) {
-      setAvailableSessions([]);
-      return;
-    }
-
-    const fetchSessions = async () => {
-      setIsLoadingSessions(true);
-      try {
-        const response = await fetch(
-          `/api/classes/${formData.class_id}/sessions?available=true`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setAvailableSessions(data);
-        }
-      } catch (error) {
-        console.error("Error fetching sessions:", error);
-      } finally {
-        setIsLoadingSessions(false);
-      }
-    };
-
-    fetchSessions();
-  }, [formData.class_id]);
 
   // Update selected class based on class ID
   useEffect(() => {
@@ -143,37 +111,21 @@ const BookingForm = ({
     }
 
     try {
-      if (initialData) {
-        // Update existing booking
-        await updateBooking.mutateAsync({
-          id: initialData.id,
-          data: {
-            client_name: formData.client_name,
-            client_email: formData.client_email,
-            client_phone: formData.client_phone || null,
-            status: formData.status as "confirmed" | "pending" | "cancelled",
-            payment_status: formData.payment_status as
-              | "paid"
-              | "unpaid"
-              | "refunded",
-            amount: Number(formData.amount),
-          },
-        });
-      } else {
-        // Create new booking
-        await createBooking.mutateAsync({
-          class_session_id: formData.class_session_id,
+      // Update existing booking
+      await updateBooking.mutateAsync({
+        id: initialData.id,
+        data: {
           client_name: formData.client_name,
           client_email: formData.client_email,
-          client_phone: formData.client_phone || undefined,
+          client_phone: formData.client_phone || null,
           status: formData.status as "confirmed" | "pending" | "cancelled",
           payment_status: formData.payment_status as
             | "paid"
             | "unpaid"
             | "refunded",
           amount: Number(formData.amount),
-        });
-      }
+        },
+      });
 
       if (onSuccess) {
         onSuccess();
@@ -188,49 +140,6 @@ const BookingForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Select
-          label="Class"
-          name="class_id"
-          options={[
-            { value: "", label: "Select a class" },
-            ...(classes.data || []).map((cls) => ({
-              value: cls.id,
-              label: cls.name,
-            })),
-          ]}
-          value={formData.class_id}
-          onChange={handleChange}
-          error={errors.class_id}
-          disabled={!!initialData || !!preselectedClassId}
-          required
-        />
-
-        <Select
-          label="Session"
-          name="class_session_id"
-          options={[
-            {
-              value: "",
-              label: isLoadingSessions
-                ? "Loading sessions..."
-                : "Select a session",
-            },
-            ...availableSessions.map((session) => ({
-              value: session.id,
-              label: formatDateTime(session.start_time),
-            })),
-          ]}
-          value={formData.class_session_id}
-          onChange={handleChange}
-          error={errors.class_session_id}
-          disabled={
-            !formData.class_id || !!initialData || !!preselectedSessionId
-          }
-          required
-        />
-      </div>
-
       <div className="bg-olive-50 p-4 rounded-lg mb-4">
         <h3 className="font-medium mb-1">Class Details</h3>
         {selectedClass ? (

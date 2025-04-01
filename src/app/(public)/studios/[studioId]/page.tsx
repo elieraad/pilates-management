@@ -7,7 +7,6 @@ import {
   Users,
   MapPin,
   Phone,
-  Mail,
   ChevronLeft,
   ChevronRight,
   Check,
@@ -80,7 +79,6 @@ export default function StudioPublicPage({
     futureDate.setDate(startDate.getDate() + 2);
     return futureDate.toISOString().split("T")[0];
   });
-  const [allSessions, setAllSessions] = useState<ClassSession[]>([]);
   const [sessionsByClassId, setSessionsByClassId] = useState<
     Record<string, ClassSession[]>
   >({});
@@ -95,7 +93,6 @@ export default function StudioPublicPage({
     phone: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingError, setBookingError] = useState("");
 
   // Ref for date scroll
@@ -137,9 +134,6 @@ export default function StudioPublicPage({
         if (!response.ok) throw new Error("Failed to fetch sessions");
 
         const sessions = await response.json();
-
-        // Store all sessions
-        setAllSessions(sessions);
 
         // Group sessions by class ID
         const groupedSessions: Record<string, ClassSession[]> = {};
@@ -195,11 +189,10 @@ export default function StudioPublicPage({
         throw new Error(errorData.error || "Failed to create booking");
       }
 
-      setBookingSuccess(true);
       setBookingStep(2); // Success step
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Booking error:", error);
-      setBookingError(error.message || "Failed to create booking");
+      setBookingError((error as Error).message || "Failed to create booking");
     } finally {
       setIsSubmitting(false);
     }
@@ -232,7 +225,7 @@ export default function StudioPublicPage({
           sessions: sessionsForClass,
         };
       })
-      .filter(Boolean);
+      .filter((x) => x !== null);
 
     return filteredData;
   };
@@ -245,7 +238,7 @@ export default function StudioPublicPage({
             Studio Not Found
           </h1>
           <p className="text-olive-700 mb-6">
-            We couldn't find the studio you're looking for.
+            {`We couldn't find the studio you're looking for.`}
           </p>
           <Link
             href="/"
@@ -258,7 +251,7 @@ export default function StudioPublicPage({
     );
   }
 
-  const formatDateObj = (dateString) => {
+  const formatDateObj = (dateString: string) => {
     const date = new Date(dateString);
     return {
       day: date.getDate(),
@@ -709,7 +702,7 @@ export default function StudioPublicPage({
               </div>
 
               <h3 className="text-xl font-medium text-olive-900 mb-2">
-                Booking Confirmed!
+                Booking Confirmed
               </h3>
               <p className="text-gray-600 mb-6">Thank you for your booking!</p>
 
@@ -748,7 +741,7 @@ export default function StudioPublicPage({
                       </span>
                     </div>
                     <p className="text-sm text-olive-700 mt-2">
-                      Payment will be collected at the studio?.
+                      Payment will be collected at the studio.
                     </p>
                   </div>
                 </div>
@@ -764,7 +757,6 @@ export default function StudioPublicPage({
                     email: "",
                     phone: "",
                   });
-                  setBookingSuccess(false);
                 }}
               >
                 Book Another Class

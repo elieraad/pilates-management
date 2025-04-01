@@ -111,7 +111,7 @@ export default async function StatsCards() {
     );
 
   const totalCapacityCount =
-    totalCapacity?.reduce((sum, session) => sum + session.class.capacity, 0) ||
+    totalCapacity?.reduce((sum, session) => sum + (session.class[0]?.capacity || 0), 0) ||
     0;
   const occupancyRate =
     totalCapacityCount > 0

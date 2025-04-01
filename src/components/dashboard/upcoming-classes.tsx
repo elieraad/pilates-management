@@ -2,12 +2,20 @@
 
 import { Table, TableRow, TableCell } from "../ui/table";
 import { useRouter } from "next/navigation";
-import { ClassSession } from "@/types/class.types";
 import Button from "../ui/button";
 import { formatTime } from "@/lib/utils/date-utils";
 
 type UpcomingClassesProps = {
-  classes: ClassSession[];
+  classes: {
+    id: string;
+    start_time: string;
+    bookings_count: number;
+    class: {
+      name: string;
+      instructor: string;
+      capacity: number;
+    };
+  }[];
 };
 
 const UpcomingClasses = ({ classes }: UpcomingClassesProps) => {

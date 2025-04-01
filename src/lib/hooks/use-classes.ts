@@ -7,6 +7,7 @@ import {
   ClassSession,
   CreateClassInput,
   CreateClassSessionInput,
+  RecurrenceOptions,
 } from "@/types/class.types";
 
 export function useClasses() {
@@ -397,7 +398,7 @@ export function useClasses() {
         updateData: {
           start_time?: string;
           recurring_pattern?: string;
-          custom_recurrence?: any;
+          custom_recurrence?: RecurrenceOptions;
         };
       }) => {
         const response = await fetch(`/api/classes/sessions/${sessionId}`, {

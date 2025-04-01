@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { validateLicense } from "@/lib/utils/license-validator";
 
+export const dynamic = "force-dynamic";
+
 // GET handler to fetch a specific session
 export async function GET(
   request: NextRequest,
@@ -94,15 +96,17 @@ export async function PUT(
     // Parse the request body
     const body = await request.json();
 
+    const startTime = new Date(currentSession.start_time);
+    if (body.start_time) {
+      const newDate = new Date(body.start_time);
+      startTime.setHours(newDate.getHours());
+      startTime.setMinutes(newDate.getMinutes());
+    }
     // Update the recurring session
     const { error: updateError } = await supabase
       .from("class_sessions")
       .update({
-        start_time: body.start_time || currentSession.start_time,
-        recurring_pattern:
-          body.recurring_pattern || currentSession.recurring_pattern,
-        custom_recurrence:
-          body.custom_recurrence || currentSession.custom_recurrence,
+        start_time: startTime.toISOString(),
       })
       .eq("id", params.id)
       .eq("studio_id", session.user.id);

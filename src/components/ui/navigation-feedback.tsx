@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 
 /**
@@ -39,7 +39,7 @@ export default function NavigationFeedback() {
         hideTimerRef.current = null;
       }, MIN_LOADING_TIME);
     }
-  }, [pathname]);
+  }, [pathname, isNavigating]);
 
   // Cleanup on component unmount
   useEffect(() => {
@@ -101,7 +101,7 @@ export default function NavigationFeedback() {
 
   // Render a subtle progress indicator
   return (
-    <div className="fixed top-0 left-0 right-0 h-1 bg-olive-200 z-50">
+    <div className="fixed top-0 left-0 right-0 h-1 bg-olive-200 z-50 sm:hidden">
       <div
         className="h-full bg-olive-600 animate-pulse"
         style={{ width: "100%" }}
@@ -109,7 +109,7 @@ export default function NavigationFeedback() {
 
       {/* Small spinner in top-right corner */}
       <div className="fixed top-4 right-4 flex items-center bg-white border border-olive-200 px-3 py-2 rounded-full shadow-sm">
-        <LoaderCircle className="w-4 h-4 animate-spin  mr-2"></LoaderCircle>
+        <LoaderCircle className="w-4 h-4 animate-spin mr-2"></LoaderCircle>
         <span className="text-xs text-olive-800">Loading...</span>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useBookings } from "@/lib/hooks/use-bookings";
 import { useClasses } from "@/lib/hooks/use-classes";
-import { ClassSession } from "@/types/class.types";
+import { Class, ClassSession } from "@/types/class.types";
 import Input from "../ui/input";
 import Select from "../ui/select";
 import Button from "../ui/button";
@@ -13,8 +13,8 @@ import { useToast } from "@/components/ui/toast";
 
 type BookingCreationFormProps = {
   preselectedSessionId?: string;
-  sessionData?: any;
-  classData?: any;
+  sessionData?: ClassSession;
+  classData?: Class;
   currentBookings?: number;
   sessionDate: string;
   time: string;
@@ -31,7 +31,7 @@ const BookingCreationForm = ({
   const router = useRouter();
   const { toast } = useToast();
   const { useCreateBookingMutation } = useBookings();
-  const { useClassesQuery, useClassSessionsQuery } = useClasses();
+  const { useClassesQuery } = useClasses();
 
   const createBooking = useCreateBookingMutation();
   const allClasses = useClassesQuery();
@@ -153,7 +153,7 @@ const BookingCreationForm = ({
 
     try {
       // Get the session date from the form data or sessionData
-      let sessionDate = formData.sessionDate;
+      const sessionDate = formData.sessionDate;
 
       // Create booking data including the session date
       const bookingData = {
@@ -175,7 +175,8 @@ const BookingCreationForm = ({
 
       // Redirect to bookings page
       router.push("/bookings");
-    } catch (error: any) {
+    } catch (e: unknown) {
+      const error = e as Error;
       // Check for potential race condition error
       if (error.message?.includes("Class session is full")) {
         toast({

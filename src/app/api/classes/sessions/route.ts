@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { validateLicense } from "@/lib/utils/license-validator";
 import { getSessions } from "@/lib/utils/recurring-sessions";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = cookies();

@@ -24,9 +24,9 @@ const EditSeriesModal = ({
   const updateSeries = useUpdateSessionSeriesMutation();
 
   const [newStartTime, setNewStartTime] = useState<string>("");
-  const [recurringPattern, setRecurringPattern] = useState<string>(
-    session?.recurring_pattern || "weekly"
-  );
+  // const [recurringPattern, setRecurringPattern] = useState<string>(
+  //   session?.recurring_pattern || "weekly"
+  // );
 
   // Set initial values when the session changes - using useEffect to update
   useEffect(() => {
@@ -38,7 +38,7 @@ const EditSeriesModal = ({
         })
         .slice(0, 5);
       setNewStartTime(time);
-      setRecurringPattern(session.recurring_pattern || "weekly");
+      // setRecurringPattern(session.recurring_pattern || "weekly");
     }
   }, [session]);
 
@@ -50,7 +50,7 @@ const EditSeriesModal = ({
       const [hours, minutes] = newStartTime.split(":").map(Number);
 
       // Create a new date object based on the original date but with the new time
-      const originalDate = new Date(session.start_time);
+      const originalDate = new Date(session.original_date);
       const updatedDateTime = new Date(originalDate);
       updatedDateTime.setHours(hours, minutes, 0, 0);
 
@@ -58,7 +58,7 @@ const EditSeriesModal = ({
         sessionId: session.id,
         updateData: {
           start_time: updatedDateTime.toISOString(),
-          recurring_pattern: recurringPattern,
+          // recurring_pattern: recurringPattern,
         },
       });
 
@@ -78,7 +78,7 @@ const EditSeriesModal = ({
         <div className="space-y-4">
           <p className="text-gray-600">
             You are editing the entire recurring session series. This will
-            affect all future occurrences of this series.
+            affect all previous and future occurrences of this series.
           </p>
 
           <div className="bg-olive-50 p-4 rounded-lg mb-4">
@@ -108,7 +108,7 @@ const EditSeriesModal = ({
               />
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-sm text-gray-600 mb-1">
                 Recurrence Pattern
               </label>
@@ -122,14 +122,15 @@ const EditSeriesModal = ({
                 <option value="biweekly">Bi-weekly</option>
                 <option value="monthly">Monthly</option>
               </select>
-            </div>
+            </div> */}
           </div>
 
           <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
             <p className="text-amber-700">
-              <strong>Note:</strong> Editing this series will affect all future
+              <strong>Note:</strong>{" "}
+              {`Editing this series will affect all future
               occurrences. Any exceptions you've previously created will remain
-              intact.
+              intact.`}
             </p>
           </div>
 

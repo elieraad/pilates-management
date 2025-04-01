@@ -1,13 +1,13 @@
 import { cookies } from "next/headers";
-import { getBookingCount } from "./bookings";
 import { createClient } from "../supabase/server";
+import { RecurrenceOptions } from "@/types/class.types";
 
 export function generateOccurrences(
   startDateTime: Date,
   rangeStart: Date,
   rangeEnd: Date,
   pattern: string,
-  customOptions: any
+  customOptions: RecurrenceOptions
 ): Date[] {
   const occurrences: Date[] = [];
 
@@ -70,7 +70,7 @@ export function generateOccurrences(
     const daysOfWeek = customOptions.daysOfWeek;
 
     // Start from the range start date
-    let current = new Date(rangeStart);
+    const current = new Date(rangeStart);
     current.setHours(0, 0, 0, 0);
 
     // Check each day in the range
@@ -248,7 +248,7 @@ export async function getSessions(
 
       bookings.forEach((booking) => {
         const key = `${booking.class_session_id}_${booking.session_date}`;
-        bookingCounts.set(key, bookingCounts.get(key) || 0 + 1);
+        bookingCounts.set(key, (bookingCounts.get(key) || 0) + 1);
       });
 
       // Apply counts to expanded sessions

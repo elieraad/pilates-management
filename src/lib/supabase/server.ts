@@ -11,10 +11,10 @@ export const createClient = (cookieStore: ReturnType<typeof cookies>) => {
         get(name: string) {
           return cookieStore.get(name)?.value;
         },
-        set(name: string, value: string, options: any) {
+        set(name: string, value: string, options) {
           cookieStore.set({ name, value, ...options });
         },
-        remove(name: string, options: any) {
+        remove(name: string, options) {
           cookieStore.set({ name, value: "", ...options });
         },
       },

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
@@ -21,6 +20,10 @@ import Button from "../ui/button";
 const MIN_LOADING_TIME = 300; // Minimum loading indication time in milliseconds
 const LOADING_DELAY = 100; // Only show loading state after this delay
 
+type Timers = {
+  showTimer: NodeJS.Timeout;
+  hideTimer?: () => NodeJS.Timeout;
+};
 const Sidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
@@ -32,7 +35,10 @@ const Sidebar = () => {
   const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
-  const [loadingTimers, setLoadingTimers] = useState<Record<string, any>>({});
+
+  const [loadingTimers, setLoadingTimers] = useState<Record<string, Timers>>(
+    {}
+  );
 
   useEffect(() => {
     if (licenseStatus?.active && licenseStatus.license?.expiresAt) {
@@ -51,7 +57,6 @@ const Sidebar = () => {
     // Clear any pending timers
     Object.values(loadingTimers).forEach((timer) => {
       if (timer.showTimer) clearTimeout(timer.showTimer);
-      if (timer.hideTimer) clearTimeout(timer.hideTimer);
     });
     setLoadingTimers({});
   }, [pathname]);
@@ -61,7 +66,6 @@ const Sidebar = () => {
     return () => {
       Object.values(loadingTimers).forEach((timer) => {
         if (timer.showTimer) clearTimeout(timer.showTimer);
-        if (timer.hideTimer) clearTimeout(timer.hideTimer);
       });
     };
   }, [loadingTimers]);
@@ -73,7 +77,7 @@ const Sidebar = () => {
     if (!licenseStatus?.active) return "text-red-500";
     if (daysRemaining !== null) {
       if (daysRemaining <= 7) return "text-red-500";
-      if (daysRemaining <= 30) return "text-amber-500";
+      if (daysRemaining <= 14) return "text-amber-500";
       return "text-green-500";
     }
     return "text-green-500";
@@ -108,11 +112,10 @@ const Sidebar = () => {
     }
 
     // Set up a delayed timer to show the loading state
-    const timers = {
+    const timers: Timers = {
       showTimer: setTimeout(() => {
         setNavigatingTo(path);
       }, LOADING_DELAY),
-      hideTimer: null,
     };
 
     setLoadingTimers((prev) => ({

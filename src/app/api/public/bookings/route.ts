@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = cookies();
@@ -121,10 +123,10 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Create public booking error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to create booking" },
+      { error: (error as Error).message || "Failed to create booking" },
       { status: 500 }
     );
   }

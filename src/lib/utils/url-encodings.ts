@@ -2,7 +2,7 @@ export class URLSafeUUIDShortener {
   // Strictly URL-safe characters
   // Only using: 0-9, a-z, A-Z, and hyphen
   private static readonly URL_SAFE_CHARS =
-    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   /**
    * Converts a hex string to a URL-safe compact representation
@@ -11,18 +11,18 @@ export class URLSafeUUIDShortener {
    */
   private static compressHex(hexStr: string): string {
     const base = this.URL_SAFE_CHARS.length;
-    let num = 0n; // Using BigInt for precise large number handling
+    let num = BigInt(0); // Using BigInt for precise large number handling
 
     // Convert hex to a single large number
     for (let i = 0; i < hexStr.length; i++) {
-      num = num * 16n + BigInt(parseInt(hexStr[i], 16));
+      num = num * BigInt(16) + BigInt(parseInt(hexStr[i], 16));
     }
 
     // Convert to URL-safe representation
-    if (num === 0n) return this.URL_SAFE_CHARS[0];
+    if (num === BigInt(0)) return this.URL_SAFE_CHARS[0];
 
     let compressed = "";
-    while (num > 0n) {
+    while (num > BigInt(0)) {
       compressed = this.URL_SAFE_CHARS[Number(num % BigInt(base))] + compressed;
       num = num / BigInt(base);
     }
@@ -37,7 +37,7 @@ export class URLSafeUUIDShortener {
    */
   private static decompressToHex(compressed: string): string {
     const base = this.URL_SAFE_CHARS.length;
-    let num = 0n;
+    let num = BigInt(0);
 
     // Convert compressed string back to a number
     for (const char of compressed) {
@@ -47,7 +47,7 @@ export class URLSafeUUIDShortener {
     }
 
     // Convert number back to hex
-    let hex = num.toString(16);
+    const hex = num.toString(16);
     return hex.padStart(32, "0");
   }
 
