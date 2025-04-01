@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, ReactNode } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  ReactNode,
+  useMemo,
+  useCallback,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useClasses } from "@/lib/hooks/use-classes";
 import { Class, ClassSession } from "@/types/class.types";
@@ -122,23 +129,6 @@ const ClassList = () => {
 
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
-  // Navigation functions for date pagination
-  const goToPreviousDay = () => {
-    const prevDate = new Date(selectedDate);
-    prevDate.setDate(prevDate.getDate() - 1);
-    setSelectedDate(prevDate);
-  };
-
-  const goToNextDay = () => {
-    const nextDate = new Date(selectedDate);
-    nextDate.setDate(nextDate.getDate() + 1);
-    setSelectedDate(nextDate);
-  };
-
-  const goToToday = () => {
-    setSelectedDate(new Date());
-  };
-
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(new Date(e.target.value));
     setDatePickerOpen(false);
@@ -226,24 +216,74 @@ const ClassList = () => {
   });
 
   // Filter sessions based on active tab and selected date
-  const filteredSessions = sessions?.filter((session) => {
-    const sessionDate = new Date(session.start_time);
+  // Optimized filtering for sessions
+  const filteredSessions = useMemo(() => {
+    if (!sessions) return [];
 
-    if (activeTab === "daily") {
-      // Check if session is on the selected date
-      return (
-        sessionDate.getDate() === selectedDate.getDate() &&
-        sessionDate.getMonth() === selectedDate.getMonth() &&
-        sessionDate.getFullYear() === selectedDate.getFullYear() &&
-        !session.is_cancelled
+    return sessions.filter((session) => {
+      const sessionDate = new Date(session.start_time);
+
+      if (activeTab === "daily") {
+        // Check if session is on the selected date
+        return (
+          sessionDate.getDate() === selectedDate.getDate() &&
+          sessionDate.getMonth() === selectedDate.getMonth() &&
+          sessionDate.getFullYear() === selectedDate.getFullYear() &&
+          !session.is_cancelled
+        );
+      } else if (activeTab === "all") {
+        return true;
+      } else if (activeTab === "recurring") {
+        return session.is_recurring && !session.is_cancelled;
+      }
+      return false;
+    });
+  }, [sessions, activeTab, selectedDate]);
+
+  // Memoize session grouping to avoid recalculating on every render
+  const sessionsByClass = useMemo(() => {
+    if (!filteredSessions) return {};
+
+    const groupedSessions: Record<string, ClassSession[]> = {};
+
+    filteredSessions.forEach((session) => {
+      if (!groupedSessions[session.class_id]) {
+        groupedSessions[session.class_id] = [];
+      }
+      groupedSessions[session.class_id].push(session);
+    });
+
+    // Pre-sort sessions by time for each class
+    Object.keys(groupedSessions).forEach((classId) => {
+      groupedSessions[classId].sort(
+        (a, b) =>
+          new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
       );
-    } else if (activeTab === "all") {
-      return true;
-    } else if (activeTab === "recurring") {
-      return session.is_recurring && !session.is_cancelled;
-    }
-    return false;
-  });
+    });
+
+    return groupedSessions;
+  }, [filteredSessions]);
+
+  // Optimized date selection functions (with useCallback)
+  const goToPreviousDay = useCallback(() => {
+    setSelectedDate((prevDate) => {
+      const newDate = new Date(prevDate);
+      newDate.setDate(newDate.getDate() - 1);
+      return newDate;
+    });
+  }, []);
+
+  const goToNextDay = useCallback(() => {
+    setSelectedDate((prevDate) => {
+      const newDate = new Date(prevDate);
+      newDate.setDate(newDate.getDate() + 1);
+      return newDate;
+    });
+  }, []);
+
+  const goToToday = useCallback(() => {
+    setSelectedDate(new Date());
+  }, []);
 
   const deleteClass = useDeleteClassMutation();
   const modifyOccurrence = useModifySessionOccurrenceMutation();
@@ -324,15 +364,6 @@ const ClassList = () => {
       console.error("Error canceling occurrence:", error);
     }
   };
-
-  // Group sessions by class
-  const sessionsByClass: Record<string, ClassSession[]> = {};
-  filteredSessions?.forEach((session) => {
-    if (!sessionsByClass[session.class_id]) {
-      sessionsByClass[session.class_id] = [];
-    }
-    sessionsByClass[session.class_id].push(session);
-  });
 
   const NestedDropdownItem = ({
     label,

@@ -173,8 +173,8 @@ const BookingCreationForm = ({
       // Create new booking
       await createBooking.mutateAsync(bookingData);
 
-      // Redirect to bookings page
-      router.push("/bookings");
+      // Redirect to classes page
+      router.push("/classes");
     } catch (e: unknown) {
       const error = e as Error;
       // Check for potential race condition error
