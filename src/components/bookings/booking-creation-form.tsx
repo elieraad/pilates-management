@@ -8,11 +8,11 @@ import { Class, ClassSession } from "@/types/class.types";
 import Input from "../ui/input";
 import Select from "../ui/select";
 import Button from "../ui/button";
-import { formatDate, formatDateTime } from "@/lib/utils/date-utils";
+import { formatDate } from "@/lib/utils/date-utils";
 import { useToast } from "@/components/ui/toast";
 
 type BookingCreationFormProps = {
-  preselectedSessionId?: string;
+  preselectedSessionId: string;
   sessionData?: ClassSession;
   classData?: Class;
   currentBookings?: number;
@@ -49,44 +49,8 @@ const BookingCreationForm = ({
     sessionDate: sessionDate || "",
   });
 
-  const [availableSessions, setAvailableSessions] = useState<ClassSession[]>(
-    []
-  );
-  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isFull, setIsFull] = useState(false);
-
-  // Fetch available sessions when class changes
-  useEffect(() => {
-    if (!formData.class_id) {
-      setAvailableSessions([]);
-      return;
-    }
-
-    const fetchSessions = async () => {
-      setIsLoadingSessions(true);
-      try {
-        const response = await fetch(
-          `/api/classes/${formData.class_id}/sessions?available=true`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          // If we have session data, check capacity
-          if (sessionData) {
-            const isSessionFull = currentBookings >= sessionData.class.capacity;
-            setIsFull(isSessionFull);
-          }
-          setAvailableSessions(data);
-        }
-      } catch (error) {
-        console.error("Error fetching sessions:", error);
-      } finally {
-        setIsLoadingSessions(false);
-      }
-    };
-
-    fetchSessions();
-  }, [formData.class_id, sessionData, currentBookings]);
 
   // Update amount when class or session changes
   useEffect(() => {
@@ -206,52 +170,6 @@ const BookingCreationForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Class selection */}
-      {!preselectedSessionId && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Select
-            label="Class"
-            name="class_id"
-            options={[
-              { value: "", label: "Select a class" },
-              ...(allClasses.data || []).map((cls) => ({
-                value: cls.id,
-                label: cls.name,
-              })),
-            ]}
-            value={formData.class_id}
-            onChange={handleChange}
-            error={errors.class_id}
-            disabled={!!preselectedSessionId}
-            required
-          />
-
-          <Select
-            label="Session"
-            name="class_session_id"
-            options={[
-              {
-                value: "",
-                label: isLoadingSessions
-                  ? "Loading sessions..."
-                  : "Select a session",
-              },
-              ...availableSessions.map((session) => ({
-                value: session.id,
-                label: formatDateTime(session.start_time),
-              })),
-            ]}
-            value={formData.class_session_id}
-            onChange={handleChange}
-            error={errors.class_session_id}
-            disabled={
-              !formData.class_id || !!preselectedSessionId || isLoadingSessions
-            }
-            required
-          />
-        </div>
-      )}
-
       {/* Session information if preselected */}
       {sessionData && (
         <div className="bg-olive-50 p-4 rounded-lg mb-4">
