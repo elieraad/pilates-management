@@ -1,6 +1,5 @@
-"use client";
-
 import { ReactNode, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 type ModalProps = {
@@ -40,7 +39,7 @@ const Modal = ({ isOpen, onClose, title, children, footer }: ModalProps) => {
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
         ref={modalRef}
@@ -62,6 +61,8 @@ const Modal = ({ isOpen, onClose, title, children, footer }: ModalProps) => {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default Modal;
