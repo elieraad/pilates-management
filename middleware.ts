@@ -71,26 +71,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // If authenticated, check license status for protected paths
-  if (isProtectedPath && session) {
-    const { data: license, error } = await supabase
-      .from("licenses")
-      .select("*")
-      .eq("studio_id", session.user.id)
-      .eq("is_active", true)
-      .gt("end_date", new Date().toISOString())
-      .limit(1)
-      .single();
-
-    // If no active license, redirect to license renewal page
-    if (error || !license) {
-      // Allow access to settings page for license renewal
-      if (!request.nextUrl.pathname.startsWith("/settings/license")) {
-        return NextResponse.redirect(new URL("/settings/license", request.url));
-      }
-    }
-  }
-
   return response;
 }
 

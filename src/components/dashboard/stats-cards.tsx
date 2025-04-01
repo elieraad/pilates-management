@@ -18,7 +18,6 @@ export default async function StatsCards() {
 
   // Get current date for filtering
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
   // Define the common studio_id filter used across all queries
@@ -86,7 +85,8 @@ export default async function StatsCards() {
 
   if (classSessionsResult.data) {
     for (const session of classSessionsResult.data) {
-      const sessionCapacity = (session.class as any).capacity || 0;
+      const sessionCapacity =
+        (session.class as unknown as { capacity: number }).capacity || 0;
 
       totalCapacity += sessionCapacity;
 
