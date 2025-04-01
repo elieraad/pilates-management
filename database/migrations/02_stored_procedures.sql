@@ -133,3 +133,23 @@ BEGIN
   RETURN booking_count;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Function to get stats for a specific studio
+CREATE OR REPLACE FUNCTION get_booking_stats(studio_id_param UUID, date_from_param TIMESTAMPTZ)
+  RETURNS JSON AS $$
+  DECLARE
+    result JSON;
+  BEGIN
+    SELECT json_build_object(
+      'total_count', COUNT(*),
+      'confirmed_count', SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END),
+      'cancelled_count', SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END)
+    ) INTO result
+    FROM bookings
+    WHERE studio_id = studio_id_param
+    AND created_at >= date_from_param;
+    
+    RETURN result;
+  END;
+  $$ LANGUAGE plpgsql;
+  

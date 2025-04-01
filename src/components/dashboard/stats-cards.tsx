@@ -2,7 +2,6 @@ import { BarChart2, Calendar, DollarSign, Users } from "lucide-react";
 import StatsCard from "./stats-card";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { computeBookingsWithSessionDate } from "@/lib/utils/bookings";
 
 export default async function StatsCards() {
   const cookieStore = cookies();
@@ -17,111 +16,94 @@ export default async function StatsCards() {
     return null;
   }
 
-  // Get studio data
-  //   const { data: studio } = await supabase
-  //     .from("studios")
-  //     .select("*")
-  //     .eq("id", session.user.id)
-  //     .single();
-
-  // Get current date for filtering today's classes
+  // Get current date for filtering
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+  // Define the common studio_id filter used across all queries
+  const studioFilter = session.user.id;
 
-  // Get recent bookings
-  const { data: recentBookings } = await supabase
-    .from("bookings")
-    .select(
+  // Execute all database queries in parallel
+  const [bookingsResult, classSessionsResult, clientsResult, financialResult] =
+    await Promise.all([
+      // Query 1: Get booking stats (total, confirmed, cancelled)
+      supabase.rpc("get_booking_stats", {
+        studio_id_param: studioFilter,
+        date_from_param: firstDayOfMonth.toISOString(),
+      }),
+
+      // Query 2: Get all class sessions with capacity data
+      supabase
+        .from("class_sessions")
+        .select(
+          `
+        id,
+        class:class_id (
+          capacity
+        ),
+        bookings!inner (
+          id,
+          status
+        )
       `
-          *,
-          class_session:class_session_id (
-            *,
-            class:class_id (*)
-          )
-        `
-    )
-    .eq("studio_id", session.user.id)
-    .order("created_at", { ascending: false })
-    .limit(3);
+        )
+        .eq("studio_id", studioFilter)
+        .gte("start_time", firstDayOfMonth.toISOString()),
 
-  if (recentBookings && recentBookings.length > 0) {
-    await computeBookingsWithSessionDate(recentBookings);
+      // Query 3: Get unique client count for the month
+      supabase
+        .from("bookings")
+        .select("client_email", { count: "exact", head: true })
+        .eq("studio_id", studioFilter)
+        .gte("created_at", firstDayOfMonth.toISOString()),
+
+      // Query 4: Get financial data for the month
+      supabase
+        .from("bookings")
+        .select("amount, payment_status")
+        .eq("studio_id", studioFilter)
+        .eq("payment_status", "paid")
+        .gte("created_at", firstDayOfMonth.toISOString()),
+    ]);
+
+  // Extract and compute statistics
+  const bookingStats = bookingsResult.data || {
+    total_count: 0,
+    confirmed_count: 0,
+  };
+  const activeClientsCount = clientsResult.count || 0;
+
+  // Calculate revenue from all paid bookings
+  const revenue = (financialResult.data || []).reduce(
+    (sum, booking) => sum + parseFloat(booking.amount),
+    0
+  );
+
+  // Calculate occupancy rate more efficiently
+  let bookedSeats = 0;
+  let totalCapacity = 0;
+
+  if (classSessionsResult.data) {
+    for (const session of classSessionsResult.data) {
+      const sessionCapacity = (session.class as any).capacity || 0;
+
+      totalCapacity += sessionCapacity;
+
+      const confirmedBookings = session.bookings.filter(
+        (booking) => booking.status === "confirmed"
+      ).length;
+
+      bookedSeats += confirmedBookings;
+    }
   }
 
-  // Get dashboard stats
-  const { data: totalBookingsData } = await supabase
-    .from("bookings")
-    .select("id", { count: "exact" })
-    .eq("studio_id", session.user.id);
-
-  const { data: activeClientsData } = await supabase
-    .from("bookings")
-    .select("client_email", { count: "exact", head: true })
-    .eq("studio_id", session.user.id)
-    .eq("status", "confirmed")
-    .gte(
-      "class_session.start_time",
-      new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-    );
-
-  const { data: revenueData } = await supabase
-    .from("bookings")
-    .select("amount")
-    .eq("studio_id", session.user.id)
-    .eq("payment_status", "paid")
-    .gte(
-      "created_at",
-      new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-    );
-
-  const revenue =
-    revenueData?.reduce(
-      (sum, booking) => sum + parseFloat(booking.amount),
-      0
-    ) || 0;
-
-  // Calculate occupancy rate
-  const { data: bookedSeats } = await supabase
-    .from("bookings")
-    .select("id", { count: "exact", head: true })
-    .eq("studio_id", session.user.id)
-    .eq("status", "confirmed")
-    .gte(
-      "class_session.start_time",
-      new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-    );
-
-  const { data: totalCapacity } = await supabase
-    .from("class_sessions")
-    .select(
-      `
-          id,
-          class:class_id (
-            capacity
-          )
-        `
-    )
-    .eq("studio_id", session.user.id)
-    .gte(
-      "start_time",
-      new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-    );
-
-  const totalCapacityCount =
-    totalCapacity?.reduce((sum, session) => sum + (session.class[0]?.capacity || 0), 0) ||
-    0;
   const occupancyRate =
-    totalCapacityCount > 0
-      ? Math.round(((bookedSeats?.length || 0) / totalCapacityCount) * 100)
-      : 0;
+    totalCapacity > 0 ? Math.round((bookedSeats / totalCapacity) * 100) : 0;
 
-  // Prepare the stats for display
   const stats = {
-    totalBookings: totalBookingsData?.length || 0,
-    activeClients: activeClientsData?.length || 0,
+    totalBookings: bookingStats.total_count || 0,
+    activeClients: activeClientsCount,
     revenue: `${revenue.toFixed(2)}`,
     occupancyRate: `${occupancyRate}%`,
   };
