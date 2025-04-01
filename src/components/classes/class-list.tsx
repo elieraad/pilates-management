@@ -1,28 +1,11 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  ReactNode,
-  useMemo,
-  useCallback,
-} from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useClasses } from "@/lib/hooks/use-classes";
 import { Class, ClassSession } from "@/types/class.types";
 import { Table, TableRow, TableCell } from "../ui/table";
-import {
-  Search,
-  Edit,
-  Trash2,
-  Plus,
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
-  MoreHorizontal,
-  Users,
-} from "lucide-react";
+import { Search, Edit, Trash2, Plus, Calendar, Users } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils/date-utils";
 import Button from "../ui/button";
 import Modal from "../ui/modal";
@@ -31,72 +14,8 @@ import ClassSessionForm from "./class-session-form";
 import ClassWizard from "./class-wizzard";
 import EditSeriesModal from "./edit-series-modal";
 import DeleteSeriesModal from "./delete-series-modal";
-
-const Dropdown = ({
-  trigger,
-  children,
-}: {
-  trigger: ReactNode;
-  children: ReactNode;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  // Close the dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => setIsOpen(false);
-    if (isOpen) {
-      document.addEventListener("click", handleClickOutside);
-      return () => document.removeEventListener("click", handleClickOutside);
-    }
-  }, [isOpen]);
-
-  return (
-    <div className="relative">
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}
-      >
-        {trigger}
-      </div>
-
-      {isOpen && (
-        <div
-          className="fixed mt-1 bg-white rounded-md shadow-lg z-50 min-w-[160px] py-1 border border-gray-100"
-          style={{
-            top: "auto",
-            right: "1vw",
-            width: "min-content",
-            transform: "translateY(0)",
-          }}
-        >
-          {children}
-        </div>
-      )}
-    </div>
-  );
-};
-// Add a DropdownItem component for menu items
-const DropdownItem = ({
-  onClick,
-  children,
-  className = "",
-}: {
-  onClick: () => void;
-  children: ReactNode;
-  className?: string;
-}) => (
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      onClick();
-    }}
-    className={`w-full text-left px-4 py-2 text-sm hover:bg-olive-50 ${className}`}
-  >
-    {children}
-  </button>
-);
+import { DatePicker } from "../ui/date-picker";
+import { ActionsMenu } from "./actions-menu";
 
 const ClassList = () => {
   const router = useRouter();
@@ -126,13 +45,6 @@ const ClassList = () => {
     () => localStorage.setItem("selectedClassDate", selectedDate.toISOString()),
     [selectedDate]
   );
-
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
-
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedDate(new Date(e.target.value));
-    setDatePickerOpen(false);
-  };
 
   const handleEditClass = (cls: Class) => {
     setSelectedClass(cls);
@@ -264,27 +176,6 @@ const ClassList = () => {
     return groupedSessions;
   }, [filteredSessions]);
 
-  // Optimized date selection functions (with useCallback)
-  const goToPreviousDay = useCallback(() => {
-    setSelectedDate((prevDate) => {
-      const newDate = new Date(prevDate);
-      newDate.setDate(newDate.getDate() - 1);
-      return newDate;
-    });
-  }, []);
-
-  const goToNextDay = useCallback(() => {
-    setSelectedDate((prevDate) => {
-      const newDate = new Date(prevDate);
-      newDate.setDate(newDate.getDate() + 1);
-      return newDate;
-    });
-  }, []);
-
-  const goToToday = useCallback(() => {
-    setSelectedDate(new Date());
-  }, []);
-
   const deleteClass = useDeleteClassMutation();
   const modifyOccurrence = useModifySessionOccurrenceMutation();
   const cancelOccurrence = useCancelSessionOccurrenceMutation();
@@ -365,108 +256,48 @@ const ClassList = () => {
     }
   };
 
-  const NestedDropdownItem = ({
-    label,
-    icon: Icon,
-    children,
-  }: {
-    label: string;
-    icon: typeof Edit;
-    children: ReactNode;
-  }) => {
-    const [isHovered, setIsHovered] = useState(false);
-    const [position, setPosition] = useState("right");
-    const menuRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-      if (isHovered && menuRef.current) {
-        const rect = menuRef.current.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-
-        // Check if submenu would overflow viewport
-        if (rect.right > viewportWidth - 20) {
-          setPosition("left");
-        } else {
-          setPosition("right");
-        }
-      }
-    }, [isHovered]);
-
-    return (
-      <div
-        className="relative"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        ref={menuRef}
-      >
-        <button className="w-full text-left px-4 py-2 text-sm hover:bg-olive-50 flex items-center justify-between">
-          <div className="flex items-center">
-            {Icon && <Icon className="h-4 w-4 mr-2" />}
-            {label}
-          </div>
-          <ChevronRight
-            className={`h-4 w-4 transition-transform ${
-              isHovered ? "rotate-90" : ""
-            }`}
-          />
-        </button>
-
-        {isHovered && (
-          <div
-            className={`absolute ${
-              position === "right" ? "left-full" : "right-full"
-            } top-0 bg-white rounded-md shadow-lg z-50 min-w-[160px] py-1 border border-gray-100`}
-          >
-            {children}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   // Render a single class card for All Classes view
   const renderClassCard = (cls: Class) => (
-    <div
-      key={cls.id}
-      className="border border-gray-100 rounded-lg overflow-hidden mb-4"
-    >
-      <div className="bg-olive-50 p-4 flex justify-between items-center">
-        <div>
-          <h3 className="font-medium text-olive-900">{cls.name}</h3>
-          <p className="text-sm text-gray-600">
-            Instructor: {cls.instructor} | Duration: {cls.duration} min |
-            Capacity: {cls.capacity} | Price: ${cls.price}
+    <div className="bg-olive-50 p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+      <div className="flex-1 min-w-0">
+        <h3 className="font-medium text-olive-900 text-sm md:text-base">
+          {cls.name}
+        </h3>
+        <p className="text-xs md:text-sm text-gray-600">
+          Instructor: {cls.instructor} | Duration: {cls.duration} min |
+          Capacity: {cls.capacity} | Price: ${cls.price}
+        </p>
+        {cls.description && (
+          <p className="text-xs md:text-sm text-gray-600 mt-1">
+            {cls.description}
           </p>
-          {cls.description && (
-            <p className="text-sm text-gray-600 mt-1">{cls.description}</p>
-          )}
-        </div>
-        <div className="flex space-x-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => handleAddSession(cls)}
-          >
-            Add Session
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            icon={Edit}
-            onClick={() => handleEditClass(cls)}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-red-600 border-red-200 hover:bg-red-50"
-            icon={Trash2}
-            onClick={() => handleDeleteClass(cls)}
-          >
-            Delete
-          </Button>
-        </div>
+        )}
+      </div>
+      <div className="flex space-x-2 mt-3 sm:mt-0">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => handleAddSession(cls)}
+        >
+          Add Session
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          icon={Edit}
+          onClick={() => handleEditClass(cls)}
+        >
+          Edit
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-red-600 border-red-200 hover:bg-red-50"
+          icon={Trash2}
+          onClick={() => handleDeleteClass(cls)}
+        >
+          Delete
+        </Button>
       </div>
     </div>
   );
@@ -509,7 +340,7 @@ const ClassList = () => {
         )}
       </TableCell>
       <TableCell className="text-right">
-        <div className="flex justify-end space-x-1">
+        <div className="flex justify-end">
           <Button
             variant="secondary"
             size="sm"
@@ -533,58 +364,13 @@ const ClassList = () => {
           </Button>
 
           {/* More Actions Dropdown with cascading menus */}
-          <Dropdown
-            trigger={
-              <Button variant="ghost" size="sm">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            }
-          >
-            <NestedDropdownItem label="Edit" icon={Edit}>
-              {session.is_recurring && (
-                <>
-                  <DropdownItem onClick={() => handleModifyOccurrence(session)}>
-                    This Occurrence
-                  </DropdownItem>
-                  <DropdownItem onClick={() => handleEditSeries(session)}>
-                    Entire Series
-                  </DropdownItem>
-                </>
-              )}
-              {!session.is_recurring && (
-                <DropdownItem onClick={() => handleModifyOccurrence(session)}>
-                  Edit Session
-                </DropdownItem>
-              )}
-            </NestedDropdownItem>
-
-            <NestedDropdownItem label="Delete" icon={Trash2}>
-              {session.is_recurring && (
-                <>
-                  <DropdownItem
-                    onClick={() => handleCancelOccurrence(session)}
-                    className="text-red-600"
-                  >
-                    This Occurrence
-                  </DropdownItem>
-                  <DropdownItem
-                    onClick={() => handleDeleteSeries(session)}
-                    className="text-red-600"
-                  >
-                    Entire Series
-                  </DropdownItem>
-                </>
-              )}
-              {!session.is_recurring && (
-                <DropdownItem
-                  onClick={() => handleCancelOccurrence(session)}
-                  className="text-red-600"
-                >
-                  Delete Session
-                </DropdownItem>
-              )}
-            </NestedDropdownItem>
-          </Dropdown>
+          <ActionsMenu
+            session={session}
+            handleCancelOccurrence={handleCancelOccurrence}
+            handleDeleteSeries={handleDeleteSeries}
+            handleEditSeries={handleEditSeries}
+            handleModifyOccurrence={handleModifyOccurrence}
+          />
         </div>
       </TableCell>
     </TableRow>
@@ -599,7 +385,7 @@ const ClassList = () => {
         </Button>
       </div>
 
-      <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm mt-2">
         <div className="border-b border-gray-100">
           <div className="flex">
             <button
@@ -628,53 +414,10 @@ const ClassList = () => {
         </div>
 
         {activeTab === "daily" && (
-          <div className="p-4 bg-olive-50 flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={goToPreviousDay}
-              icon={ChevronLeft}
-              size="sm"
-            >
-              Previous Day
-            </Button>
-
-            <div className="relative">
-              <Button
-                variant="ghost"
-                onClick={() => setDatePickerOpen(!datePickerOpen)}
-                className="font-medium"
-              >
-                <Calendar className="w-4 h-4 mr-2" />
-                {formattedDate}
-              </Button>
-
-              {datePickerOpen && (
-                <div className="absolute top-full mt-1 bg-white shadow-md rounded-md p-2 z-10">
-                  <input
-                    type="date"
-                    value={dateInputValue}
-                    onChange={handleDateChange}
-                    className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-olive-200"
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="flex space-x-2">
-              <Button variant="secondary" size="sm" onClick={goToToday}>
-                Today
-              </Button>
-
-              <Button
-                variant="ghost"
-                onClick={goToNextDay}
-                icon={ChevronRight}
-                size="sm"
-              >
-                Next Day
-              </Button>
-            </div>
-          </div>
+          <DatePicker
+            date={dateInputValue}
+            setSelectedDate={(x) => setSelectedDate(x)}
+          />
         )}
 
         <div className="p-4">
@@ -703,7 +446,16 @@ const ClassList = () => {
               {/* All Classes View */}
               {activeTab === "all-classes" && (
                 <div className="space-y-4">
-                  {filteredClasses.map((cls) => renderClassCard(cls))}
+                  {filteredClasses.map((cls) => {
+                    return (
+                      <div
+                        key={cls.id}
+                        className="border border-gray-100 rounded-lg overflow-hidden mb-4 shadow-sm"
+                      >
+                        {renderClassCard(cls)}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 
@@ -736,44 +488,7 @@ const ClassList = () => {
                       key={cls.id}
                       className="border border-gray-100 rounded-lg overflow-hidden"
                     >
-                      <div className="bg-olive-50 p-4 flex justify-between items-center">
-                        <div>
-                          <h3 className="font-medium text-olive-900">
-                            {cls.name}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            Instructor: {cls.instructor} | Duration:{" "}
-                            {cls.duration} min | Capacity: {cls.capacity} |
-                            Price: ${cls.price}
-                          </p>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => handleAddSession(cls)}
-                          >
-                            Add Session
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            icon={Edit}
-                            onClick={() => handleEditClass(cls)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-red-600 border-red-200 hover:bg-red-50"
-                            icon={Trash2}
-                            onClick={() => handleDeleteClass(cls)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </div>
+                      {renderClassCard(cls)}
 
                       {/* Class Sessions */}
                       <div className="p-4">

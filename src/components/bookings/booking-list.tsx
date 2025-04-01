@@ -12,9 +12,6 @@ import {
   Search,
   Edit,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
   Filter,
   AlertCircle,
 } from "lucide-react";
@@ -23,6 +20,7 @@ import Button from "../ui/button";
 import Modal from "../ui/modal";
 import Select from "../ui/select";
 import BookingForm from "./booking-form";
+import { DatePicker } from "../ui/date-picker";
 
 const BookingList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,34 +50,11 @@ const BookingList = () => {
     [selectedDate]
   );
 
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   // Filter states (for local filtering)
   const [classFilter, setClassFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "">("");
   const [paymentFilter, setPaymentFilter] = useState("");
-
-  // Navigation functions for date pagination
-  const goToPreviousDay = () => {
-    const prevDate = new Date(selectedDate);
-    prevDate.setDate(prevDate.getDate() - 1);
-    setSelectedDate(prevDate);
-  };
-
-  const goToNextDay = () => {
-    const nextDate = new Date(selectedDate);
-    nextDate.setDate(nextDate.getDate() + 1);
-    setSelectedDate(nextDate);
-  };
-
-  const goToToday = () => {
-    setSelectedDate(new Date());
-  };
-
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedDate(new Date(e.target.value));
-    setDatePickerOpen(false);
-  };
 
   // Format date for display and input
   const formattedDate = selectedDate.toLocaleDateString("en-US", {
@@ -243,54 +218,10 @@ const BookingList = () => {
       </div>
 
       <div className="bg-white rounded-xl overflow-hidden shadow-sm">
-        <div className="p-4 bg-olive-50 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={goToPreviousDay}
-            icon={ChevronLeft}
-            size="sm"
-          >
-            Previous Day
-          </Button>
-
-          <div className="relative">
-            <Button
-              variant="ghost"
-              onClick={() => setDatePickerOpen(!datePickerOpen)}
-              className="font-medium"
-            >
-              <Calendar className="w-4 h-4 mr-2" />
-              {formattedDate}
-            </Button>
-
-            {datePickerOpen && (
-              <div className="absolute top-full mt-1 bg-white shadow-md rounded-md p-2 z-10">
-                <input
-                  type="date"
-                  value={dateInputValue}
-                  onChange={handleDateChange}
-                  className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-olive-200"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="flex space-x-2">
-            <Button variant="secondary" size="sm" onClick={goToToday}>
-              Today
-            </Button>
-
-            <Button
-              variant="ghost"
-              onClick={goToNextDay}
-              icon={ChevronRight}
-              size="sm"
-            >
-              Next Day
-            </Button>
-          </div>
-        </div>
-
+        <DatePicker
+          date={dateInputValue}
+          setSelectedDate={(x) => setSelectedDate(x)}
+        ></DatePicker>
         <div className="p-4">
           <div className="flex flex-col md:flex-row md:items-center mb-4 gap-2">
             <div className="relative flex-1">
@@ -367,7 +298,9 @@ const BookingList = () => {
                     { value: "cancelled", label: "Cancelled" },
                   ]}
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as BookingStatus)}
+                  onChange={(e) =>
+                    setStatusFilter(e.target.value as BookingStatus)
+                  }
                 />
 
                 <Select

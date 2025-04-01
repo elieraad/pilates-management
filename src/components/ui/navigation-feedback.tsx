@@ -107,8 +107,8 @@ export default function NavigationFeedback() {
         style={{ width: "100%" }}
       ></div>
 
-      {/* Small spinner in top-right corner */}
-      <div className="fixed top-4 right-4 flex items-center bg-white border border-olive-200 px-3 py-2 rounded-full shadow-sm">
+      {/* Small spinner in bottom-right corner */}
+      <div className="fixed bottom-4 right-4 flex items-center bg-white border border-olive-200 px-3 py-2 rounded-full shadow-sm">
         <LoaderCircle className="w-4 h-4 animate-spin mr-2"></LoaderCircle>
         <span className="text-xs text-olive-800">Loading...</span>
       </div>

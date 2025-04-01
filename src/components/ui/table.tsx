@@ -8,12 +8,15 @@ type TableProps = {
 
 export const Table = ({ headers, children, className = "" }: TableProps) => {
   return (
-    <div className={`overflow-x-auto ${className}`}>
-      <table className="w-full min-w-full">
+    <div className={`overflow-x-auto w-full ${className}`}>
+      <table className="table-auto w-full min-w-max border-collapse">
         <thead>
           <tr className="text-left text-gray-500 text-sm border-b">
             {headers.map((header, index) => (
-              <th key={index} className="pb-2 pl-4 first:pl-4 last:pr-4">
+              <th
+                key={index}
+                className="pb-2 px-4 first:pl-4 last:pr-4 text-xs md:text-sm whitespace-nowrap"
+              >
                 {header}
               </th>
             ))}
@@ -38,7 +41,7 @@ export const TableRow = ({
 }: TableRowProps) => {
   return (
     <tr
-      className={`border-b border-gray-100 hover:bg-olive-50 ${
+      className={`border-b border-gray-200 hover:bg-gray-50 transition-colors ${
         onClick ? "cursor-pointer" : ""
       } ${className}`}
       onClick={onClick}
@@ -55,6 +58,10 @@ type TableCellProps = {
 
 export const TableCell = ({ children, className = "" }: TableCellProps) => {
   return (
-    <td className={`py-3 first:pl-4 last:pr-4 ${className}`}>{children}</td>
+    <td
+      className={`py-3 px-4 first:pl-4 last:pr-4 text-xs md:text-sm break-words max-w-xs sm:max-w-none ${className}`}
+    >
+      {children}
+    </td>
   );
 };

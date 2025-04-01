@@ -79,19 +79,20 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div>
+    <div className="space-y-2">
       <h1 className="text-2xl font-serif text-olive-900">Dashboard</h1>
-
+  
       <div className="bg-white p-6 rounded-xl shadow-sm">
         <h2 className="text-xl font-serif text-olive-900 mb-4">
           Studio Overview
         </h2>
-        <StatsCards></StatsCards>
+        <StatsCards />
       </div>
-
+  
       <UpcomingClasses classes={upcomingClasses} />
-
+  
       <RecentBookings bookings={recentBookings || []} />
     </div>
   );
+  
 }
