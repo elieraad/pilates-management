@@ -25,15 +25,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if class session exists and is not cancelled
+    // Check if session exists and get class capacity
     const { data: sessionData, error: sessionError } = await supabase
       .from("class_sessions")
-      .select(
-        `
-        *,
-        class:class_id (capacity)
-      `
-      )
+      .select(`*, class:class_id (capacity)`)
       .eq("id", body.class_session_id)
       .eq("studio_id", body.studio_id)
       .eq("is_cancelled", false)
@@ -46,80 +41,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get current booking count to check capacity
-    const { data: bookingsCount, error: countError } = await supabase
-      .from("bookings")
-      .select("id", { count: "exact" })
-      .eq("class_session_id", body.class_session_id)
-      .eq("session_date", body.sessionDate)
-      .neq("status", "cancelled");
+    // Use the stored procedure for transaction safety
+    const { data: result, error: transactionError } = await supabase.rpc(
+      "create_booking_with_capacity_check",
+      {
+        p_class_session_id: body.class_session_id,
+        p_studio_id: body.studio_id,
+        p_client_name: body.client_name,
+        p_client_email: body.client_email,
+        p_client_phone: body.client_phone || null,
+        p_status: body.status || "confirmed",
+        p_payment_status: body.payment_status || "unpaid",
+        p_amount: body.amount,
+        p_capacity: sessionData.class.capacity,
+        p_session_date: body.sessionDate,
+      }
+    );
 
-    if (countError) {
-      throw countError;
+    if (transactionError) {
+      // Handle specific error cases
+      if (transactionError.message.includes("Class session is full")) {
+        return NextResponse.json(
+          { error: "Class session is full" },
+          { status: 409 }
+        );
+      } else if (
+        transactionError.message.includes("Client already has a booking")
+      ) {
+        return NextResponse.json(
+          { error: "Client already has a booking for this session" },
+          { status: 409 }
+        );
+      }
+      throw transactionError;
     }
-
-    // Check if session is already full
-    if (bookingsCount && bookingsCount.length >= sessionData.class.capacity) {
-      return NextResponse.json(
-        { error: "Class session is full" },
-        { status: 409 }
-      );
-    }
-
-    // Check if client already has a booking for this session
-    const { data: existingBooking, error: existingError } = await supabase
-      .from("bookings")
-      .select("id")
-      .eq("class_session_id", body.class_session_id)
-      .eq("session_date", body.sessionDate)
-      .eq("client_email", body.client_email)
-      .neq("status", "cancelled")
-      .maybeSingle();
-
-    if (existingError) {
-      throw existingError;
-    }
-
-    if (existingBooking) {
-      return NextResponse.json(
-        { error: "Client already has a booking for this session" },
-        { status: 409 }
-      );
-    }
-
-    // Create the booking
-    const { data: newBooking, error: createError } = await supabase
-      .from("bookings")
-      .insert({
-        studio_id: body.studio_id,
-        class_session_id: body.class_session_id,
-        client_name: body.client_name,
-        client_email: body.client_email,
-        client_phone: body.client_phone || null,
-        status: body.status || "confirmed",
-        payment_status: body.payment_status || "unpaid",
-        amount: body.amount,
-        session_date: body.sessionDate,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (createError) {
-      throw createError;
-    }
-
-    // TODO: we should also:
-    // 1. Send a confirmation email to the client
-    // 2. Notify the studio about the new booking
-    // 3. Potentially integrate with a payment gateway
 
     return NextResponse.json(
       {
         success: true,
         message: "Booking created successfully",
-        booking: newBooking,
+        booking: result,
       },
       { status: 201 }
     );

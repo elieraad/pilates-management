@@ -5,20 +5,15 @@ export async function validateLicense(
   studioId: string
 ): Promise<boolean> {
   try {
-    const { data: license, error } = await supabase
-      .from("licenses")
-      .select("*")
-      .eq("studio_id", studioId)
-      .eq("is_active", true)
-      .gt("end_date", new Date().toISOString())
-      .limit(1)
-      .single();
+    const { data, error } = await supabase.rpc("check_studio_license", {
+      p_studio_id: studioId,
+    });
 
-    if (error || !license) {
+    if (error) {
       return false;
     }
 
-    return true;
+    return !!data;
   } catch (error) {
     console.error("License validation error:", error);
     return false;
