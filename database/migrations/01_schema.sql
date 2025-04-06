@@ -42,6 +42,9 @@ CREATE POLICY "Studios can update their own profile" ON studios
 CREATE POLICY "Studios can insert their own profile" ON studios
   FOR INSERT USING (auth.uid() = id);
 
+CREATE POLICY "Public can view studios data" ON studios
+  FOR SELECT USING (true);
+
 -- Trigger for updated_at
 CREATE TRIGGER set_studios_updated_at
   BEFORE UPDATE ON studios
@@ -105,6 +108,9 @@ ALTER TABLE classes ENABLE ROW LEVEL SECURITY;
 -- Create policies
 CREATE POLICY "Studios can manage their own classes" ON classes
   FOR ALL USING (auth.uid() = studio_id);
+
+CREATE POLICY "Public can view all classes" on classes
+  FOR SELECT USING (true);
 
 -- Trigger for updated_at
 CREATE TRIGGER set_classes_updated_at
@@ -174,6 +180,8 @@ ALTER TABLE session_exceptions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Studios can manage their own class exceptions" ON session_exceptions
   FOR ALL USING (auth.uid() = studio_id);
 
+CREATE POLICY "Public can view session exceptions" ON session_exceptions
+  FOR SELECT USING (true);
 -- Trigger for updated_at
 CREATE TRIGGER set_session_exceptions_updated_at
   BEFORE UPDATE ON session_exceptions
@@ -215,8 +223,18 @@ ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Studios can manage bookings for their classes" ON bookings
   FOR ALL USING (auth.uid() = studio_id);
 
+CREATE POLICY "Public can add bookings" ON bookings
+  FOR INSERT USING (true);
+
+CREATE POLICY "Public can view bookings" ON bookings
+  FOR SELECT USING (true);
+
 -- Trigger for updated_at
 CREATE TRIGGER set_bookings_updated_at
   BEFORE UPDATE ON bookings
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
+
+
+
+
