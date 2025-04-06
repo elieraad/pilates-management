@@ -12,8 +12,18 @@ export const createClient = (cookieStore: ReturnType<typeof cookies>) => {
           return Promise.resolve(cookieStore.getAll());
         },
         setAll(cookies) {
-          cookies.forEach(c => cookieStore.set(c.name, c.value, c.options))
-        }
+          cookies.forEach((c) => {
+            try {
+              // In Server Components / Route Handlers, we should avoid
+              // directly setting cookies as it may cause this error
+              cookieStore.set(c.name, c.value, c.options);
+            } catch (e) {
+              console.error(e)
+              // Silent catch - cookie operations in server components
+              // may fail but shouldn't break the flow
+            }
+          });
+        },
       },
     }
   );
