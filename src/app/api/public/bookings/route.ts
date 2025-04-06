@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error("Create public booking error:", error);
     return NextResponse.json(
-      { error: (error as Error).message || "Failed to create booking" },
+      { error: "Failed to create booking" },
       { status: 500 }
     );
   }

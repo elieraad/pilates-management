@@ -166,33 +166,34 @@ export default function StudioPublicPage({
         .toISOString()
         .split("T")[0];
 
+      const body = JSON.stringify({
+        studio_id: studioId,
+        class_session_id: selectedSession.id,
+        client_name: clientInfo.name,
+        client_email: clientInfo.email,
+        client_phone: clientInfo.phone || undefined,
+        status: "confirmed",
+        payment_status: "unpaid",
+        amount: selectedSession.class.price,
+        sessionDate: sessionDate,
+      });
+
       const response = await fetch("/api/public/bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          studio_id: studioId,
-          class_session_id: selectedSession.id,
-          client_name: clientInfo.name,
-          client_email: clientInfo.email,
-          client_phone: clientInfo.phone || undefined,
-          status: "confirmed",
-          payment_status: "unpaid",
-          amount: selectedSession.class.price,
-          sessionDate: sessionDate,
-        }),
+        body,
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create booking");
+        throw new Error("Failed to create booking");
       }
 
       setBookingStep(2); // Success step
     } catch (error: unknown) {
       console.error("Booking error:", error);
-      setBookingError((error as Error).message || "Failed to create booking");
+      setBookingError("Failed to create booking");
     } finally {
       setIsSubmitting(false);
     }

@@ -12,8 +12,21 @@ export default async function SettingsPage() {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
 
+  // Get the current user's session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    return null;
+  }
+
   // Get the studio profile
-  const { data: studio } = await supabase.from("studios").select("*").single();
+  const { data: studio } = await supabase
+    .from("studios")
+    .select("*")
+    .eq("id", session.user.id)
+    .single();
 
   return (
     <div className="space-y-8">
