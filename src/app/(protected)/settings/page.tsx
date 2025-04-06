@@ -14,10 +14,10 @@ export default async function SettingsPage() {
 
   // Get the current user's session
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 
@@ -25,7 +25,7 @@ export default async function SettingsPage() {
   const { data: studio } = await supabase
     .from("studios")
     .select("*")
-    .eq("id", session.user.id)
+    .eq("id", user.id)
     .single();
 
   return (

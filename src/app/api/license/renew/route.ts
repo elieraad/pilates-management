@@ -12,10 +12,10 @@ export async function POST(request: NextRequest) {
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const { data: newLicense, error } = await supabase
       .from("licenses")
       .insert({
-        studio_id: session.user.id,
+        studio_id: user.id,
         license_type: body.license_type,
         start_date: startDate,
         end_date: endDate.toISOString(),
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const { error: updateError } = await supabase
       .from("licenses")
       .update({ is_active: false })
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .neq("id", newLicense.id);
 
     if (updateError) {

@@ -15,10 +15,10 @@ export async function GET(
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -27,7 +27,7 @@ export async function GET(
       .from("classes")
       .select("*")
       .eq("id", params.id)
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .eq("is_cancelled", false)
       .single();
 
@@ -55,15 +55,15 @@ export async function PUT(
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if the studio has an active license
-    const licenseValid = await validateLicense(supabase, session.user.id);
+    const licenseValid = await validateLicense(supabase, user.id);
 
     if (!licenseValid) {
       return NextResponse.json(
@@ -77,7 +77,7 @@ export async function PUT(
       .from("classes")
       .select("id")
       .eq("id", params.id)
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .single();
 
     if (checkError) {
@@ -103,7 +103,7 @@ export async function PUT(
         updated_at: new Date().toISOString(),
       })
       .eq("id", params.id)
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .select()
       .single();
 
@@ -131,15 +131,15 @@ export async function DELETE(
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if the studio has an active license
-    const licenseValid = await validateLicense(supabase, session.user.id);
+    const licenseValid = await validateLicense(supabase, user.id);
 
     if (!licenseValid) {
       return NextResponse.json(
@@ -153,7 +153,7 @@ export async function DELETE(
       .from("classes")
       .select("id")
       .eq("id", params.id)
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .single();
 
     if (checkError) {
@@ -169,7 +169,7 @@ export async function DELETE(
       .from("bookings")
       .select("id, class_sessions!inner(class_id)")
       .eq("class_sessions.class_id", params.id)
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .limit(1);
 
     if (bookingsError) throw bookingsError;
@@ -198,7 +198,7 @@ export async function DELETE(
         is_cancelled: true,
       })
       .eq("id", params.id)
-      .eq("studio_id", session.user.id);
+      .eq("studio_id", user.id);
 
     if (deleteError) throw deleteError;
 

@@ -11,10 +11,10 @@ export default async function HomePage() {
 
   // Check if user is already logged in
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (session) {
+  if (user) {
     redirect("/dashboard");
   }
 

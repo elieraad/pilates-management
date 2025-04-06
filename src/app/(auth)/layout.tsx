@@ -12,11 +12,11 @@ export default async function AuthLayout({
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // If user is authenticated, redirect to dashboard
-  if (session) {
+  if (user) {
     redirect("/dashboard");
   }
 

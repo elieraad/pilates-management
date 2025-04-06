@@ -57,8 +57,8 @@ export async function middleware(request: NextRequest) {
 
   // Check for authentication and license status
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Protect routes that require authentication
   const protectedPaths = ["/dashboard", "/classes", "/bookings", "/settings"];
@@ -66,7 +66,7 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(path)
   );
 
-  if (isProtectedPath && !session) {
+  if (isProtectedPath && !user) {
     // Redirect to login if not authenticated
     return NextResponse.redirect(new URL("/login", request.url));
   }

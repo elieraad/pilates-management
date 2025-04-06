@@ -13,11 +13,11 @@ export default async function ProtectedLayout({
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // If not authenticated, redirect to login
-  if (!session) {
+  if (!user) {
     redirect("/login");
   }
 

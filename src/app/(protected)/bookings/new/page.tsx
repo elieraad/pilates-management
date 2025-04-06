@@ -23,10 +23,10 @@ export default async function NewBookingPage({
 
   // Check if user is authenticated
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     redirect("/login");
   }
 
@@ -47,7 +47,7 @@ export default async function NewBookingPage({
       `
     )
     .eq("id", searchParams.sessionId)
-    .eq("studio_id", session.user.id)
+    .eq("studio_id", user.id)
     .eq("is_cancelled", false)
     .single();
 

@@ -16,10 +16,10 @@ export default async function DashboardPage() {
 
   // Get the current user's session
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
       bookings_count:bookings(count)
     `
     )
-    .eq("studio_id", session.user.id)
+    .eq("studio_id", user.id)
     .eq("is_cancelled", false)
     .gte("start_time", today.toISOString())
     .lt("start_time", tomorrow.toISOString())
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
       )
     `
     )
-    .eq("studio_id", session.user.id)
+    .eq("studio_id", user.id)
     .order("created_at", { ascending: false })
     .limit(3);
 

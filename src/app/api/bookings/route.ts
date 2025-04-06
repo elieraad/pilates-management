@@ -14,10 +14,10 @@ export async function GET(request: NextRequest) {
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         )
       `
       )
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .order("created_at", { ascending: false });
 
     // Apply filters if provided
@@ -109,15 +109,15 @@ export async function POST(request: NextRequest) {
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if the studio has an active license
-    const licenseValid = await validateLicense(supabase, session.user.id);
+    const licenseValid = await validateLicense(supabase, user.id);
 
     if (!licenseValid) {
       return NextResponse.json(
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       `
       )
       .eq("id", body.class_session_id)
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .eq("is_cancelled", false)
       .single();
 
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
       "create_booking_with_capacity_check",
       {
         p_class_session_id: body.class_session_id,
-        p_studio_id: session.user.id,
+        p_studio_id: user.id,
         p_client_name: body.client_name,
         p_client_email: body.client_email,
         p_client_phone: body.client_phone || null,

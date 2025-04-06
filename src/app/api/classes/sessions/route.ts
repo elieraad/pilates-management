@@ -13,10 +13,10 @@ export async function GET(request: NextRequest) {
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
     // Get recurring sessions that might have occurrences in this range
-    const allSessions = await getSessions(session.user.id, startDate, endDate);
+    const allSessions = await getSessions(user.id, startDate, endDate);
 
     return NextResponse.json(allSessions, { status: 200 });
   } catch (error) {
@@ -48,15 +48,15 @@ export async function POST(request: NextRequest) {
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if the studio has an active license
-    const licenseValid = await validateLicense(supabase, session.user.id);
+    const licenseValid = await validateLicense(supabase, user.id);
 
     if (!licenseValid) {
       return NextResponse.json(
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       .from("classes")
       .select("id")
       .eq("id", body.class_id)
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .single();
 
     if (classError) {
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     // Create the session
     const sessionData = {
       class_id: body.class_id,
-      studio_id: session.user.id,
+      studio_id: user.id,
       start_time: body.start_time,
       is_recurring: body.is_recurring || false,
       recurring_pattern: body.is_recurring

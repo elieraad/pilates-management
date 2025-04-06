@@ -12,10 +12,10 @@ export async function GET() {
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -23,7 +23,7 @@ export async function GET() {
     const { data: studio, error } = await supabase
       .from("studios")
       .select("*")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .single();
 
     if (error) {
@@ -47,10 +47,10 @@ export async function PUT(request: NextRequest) {
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -71,7 +71,7 @@ export async function PUT(request: NextRequest) {
         longitude: body.longitude,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .select()
       .single();
 

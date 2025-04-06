@@ -13,10 +13,10 @@ export async function GET() {
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -24,7 +24,7 @@ export async function GET() {
     const { data: classes, error } = await supabase
       .from("classes")
       .select("*")
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .eq("is_cancelled", false)
       .order("name", { ascending: true });
 
@@ -49,15 +49,15 @@ export async function POST(request: NextRequest) {
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if the studio has an active license
-    const licenseValid = await validateLicense(supabase, session.user.id);
+    const licenseValid = await validateLicense(supabase, user.id);
 
     if (!licenseValid) {
       return NextResponse.json(
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     const { data: newClass, error } = await supabase
       .from("classes")
       .insert({
-        studio_id: session.user.id,
+        studio_id: user.id,
         name: body.name,
         description: body.description || null,
         duration: body.duration,

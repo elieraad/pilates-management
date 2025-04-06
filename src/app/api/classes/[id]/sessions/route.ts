@@ -14,10 +14,10 @@ export async function GET(
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -39,7 +39,7 @@ export async function GET(
       `
       )
       .eq("class_id", params.id)
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .eq("is_cancelled", false)
       .gte("start_time", startDate);
 

@@ -9,10 +9,10 @@ export default async function StatsCards() {
 
   // Get the current user's session
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 
@@ -21,7 +21,7 @@ export default async function StatsCards() {
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
   // Define the common studio_id filter used across all queries
-  const studioFilter = session.user.id;
+  const studioFilter = user.id;
 
   // Execute all database queries in parallel
   const [bookingsResult, classSessionsResult, clientsResult, financialResult] =

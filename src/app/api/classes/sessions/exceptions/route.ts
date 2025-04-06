@@ -12,15 +12,15 @@ export async function POST(request: NextRequest) {
 
     // Check if user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if the studio has an active license
-    const licenseValid = await validateLicense(supabase, session.user.id);
+    const licenseValid = await validateLicense(supabase, user.id);
 
     if (!licenseValid) {
       return NextResponse.json(
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       .from("class_sessions")
       .select("id, studio_id")
       .eq("id", body.recurring_session_id)
-      .eq("studio_id", session.user.id)
+      .eq("studio_id", user.id)
       .single();
 
     if (sessionError) {
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
         .from("session_exceptions")
         .insert({
           recurring_session_id: body.recurring_session_id,
-          studio_id: session.user.id,
+          studio_id: user.id,
           original_date: body.original_date,
           exception_type: body.exception_type,
           modified_start_time:
