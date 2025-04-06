@@ -19,20 +19,20 @@ const Modal = ({ isOpen, onClose, title, children, footer }: ModalProps) => {
     };
 
     const handleOutsideClick = (e: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+      if (modalRef.current && !modalRef.current.contains(e.target as Node) && e.target === e.currentTarget) {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-      document.addEventListener("mousedown", handleOutsideClick);
+      document.addEventListener("keyup", handleEscape);
+      document.addEventListener("mouseup", handleOutsideClick);
       document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keyup", handleEscape);
+      document.removeEventListener("mouseup", handleOutsideClick);
       document.body.style.overflow = "auto";
     };
   }, [isOpen, onClose]);
