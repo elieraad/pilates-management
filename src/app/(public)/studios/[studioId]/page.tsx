@@ -172,9 +172,6 @@ export default function StudioPublicPage({
         client_name: clientInfo.name,
         client_email: clientInfo.email,
         client_phone: clientInfo.phone || undefined,
-        status: "confirmed",
-        payment_status: "unpaid",
-        amount: selectedSession.class.price,
         sessionDate: sessionDate,
       });
 

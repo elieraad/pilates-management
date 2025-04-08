@@ -88,32 +88,24 @@ export const StudioAuthProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     setIsLoading(true);
     try {
-      // Register the user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            studio_name: studioData.name,
-          },
+      // Call the server-side registration endpoint
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          email,
+          password,
+          studioData,
+        }),
       });
-      if (authError) throw authError;
-
-      // Create the studio profile if sign up successful
-      if (authData.user) {
-        const { error: profileError } = await supabase.from("studios").insert({
-          id: authData.user.id,
-          name: studioData.name,
-          address: studioData.address || "",
-          phone: studioData.phone || "",
-          email: email,
-          description: studioData.description || "",
-          opening_hours: studioData.opening_hours || "",
-        });
-        if (profileError) throw profileError;
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create account");
       }
-
+  
       router.push("/login?registered=true");
     } catch (error) {
       console.error("Error signing up:", error);

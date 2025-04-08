@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     // Check if session exists and get class capacity
     const { data: sessionData, error: sessionError } = await supabase
       .from("class_sessions")
-      .select(`*, class:class_id (capacity)`)
+      .select(`*, class:class_id (capacity, price)`)
       .eq("id", body.class_session_id)
       .eq("studio_id", body.studio_id)
       .eq("is_cancelled", false)
@@ -60,9 +60,9 @@ export async function POST(request: NextRequest) {
         p_client_name: body.client_name,
         p_client_email: body.client_email,
         p_client_phone: body.client_phone || null,
-        p_status: body.status || "confirmed",
-        p_payment_status: body.payment_status || "unpaid",
-        p_amount: body.amount,
+        p_status: "pending",
+        p_payment_status: "unpaid",
+        p_amount: sessionData.class.price,
         p_capacity: sessionData.class.capacity,
         p_session_date: body.sessionDate,
       }
