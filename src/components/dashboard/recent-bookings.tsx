@@ -2,12 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { Table, TableRow, TableCell } from "../ui/table";
-import { BookingWithClient } from "@/types/booking.types";
+import { BookingSession } from "@/types/booking.types";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { formatDateTime } from "@/lib/utils/date-utils";
 
 type RecentBookingsProps = {
-  bookings: BookingWithClient[];
+  bookings: BookingSession[];
 };
 
 const RecentBookings = ({ bookings }: RecentBookingsProps) => {
@@ -64,7 +64,7 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
       <Table headers={["Client", "Class", "Date & Time", "Status"]}>
         {bookings.slice(0, 3).map((booking) => (
           <TableRow key={booking.id}>
-            <TableCell className="font-medium">{booking.client_name}</TableCell>
+            <TableCell className="font-medium">{booking.client.name}</TableCell>
             <TableCell className="text-gray-600">
               {booking.class_session.class.name}
             </TableCell>

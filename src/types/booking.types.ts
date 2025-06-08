@@ -2,13 +2,17 @@ import { ClassSession } from "./class.types";
 
 export type BookingStatus = "confirmed" | "pending" | "cancelled";
 
+export interface Client {
+  id?: string;
+  name: string;
+  email: string;
+  phone?: string;
+}
 export interface Booking {
   id: string;
   class_session_id: string;
   studio_id: string;
-  client_name: string;
-  client_email: string;
-  client_phone: string | null;
+  client: Client;
   status: BookingStatus;
   payment_status: "paid" | "unpaid" | "refunded";
   amount: number;
@@ -17,7 +21,7 @@ export interface Booking {
   updated_at: string;
 }
 
-export interface BookingWithClient extends Booking {
+export interface BookingSession extends Booking {
   class_session: ClassSession;
 }
 

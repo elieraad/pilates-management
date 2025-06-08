@@ -64,6 +64,12 @@ export default async function DashboardPage() {
     .select(
       `
       *,
+      client:client_id (
+          id,
+          name,
+          email,
+          phone
+        ),
       class_session:class_session_id (
         *,
         class:class_id (*)

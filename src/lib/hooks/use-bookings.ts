@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/toast";
 import {
   Booking,
-  BookingWithClient,
+  BookingSession,
   CreateBookingInput,
 } from "@/types/booking.types";
 
@@ -17,7 +17,7 @@ export function useBookings() {
     startDate?: string,
     endDate?: string,
     classId?: string
-  ): Promise<BookingWithClient[]> => {
+  ): Promise<BookingSession[]> => {
     let url = "/api/bookings";
     const params = new URLSearchParams();
 
@@ -38,7 +38,7 @@ export function useBookings() {
     return response.json();
   };
 
-  const fetchBooking = async (id: string): Promise<BookingWithClient> => {
+  const fetchBooking = async (id: string): Promise<BookingSession> => {
     const response = await fetch(`/api/bookings/${id}`);
     if (!response.ok) {
       const error = await response.json();
@@ -49,7 +49,7 @@ export function useBookings() {
 
   const createBooking = async (
     data: CreateBookingInput
-  ): Promise<BookingWithClient> => {
+  ): Promise<BookingSession> => {
     const response = await fetch("/api/bookings", {
       method: "POST",
       headers: {
@@ -67,7 +67,7 @@ export function useBookings() {
   const updateBooking = async (
     id: string,
     data: Partial<Booking>
-  ): Promise<BookingWithClient> => {
+  ): Promise<BookingSession> => {
     const response = await fetch(`/api/bookings/${id}`, {
       method: "PUT",
       headers: {

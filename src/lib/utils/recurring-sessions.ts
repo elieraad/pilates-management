@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { createClient } from "../supabase/server";
 import { RecurrenceOptions } from "@/types/class.types";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export function generateOccurrences(
   startDateTime: Date,
@@ -98,7 +99,8 @@ export function generateOccurrences(
 
   return occurrences;
 }
-export async function getSessions(
+
+export function getSessions(
   studioId: string,
   startDate: string,
   endDate: string,
@@ -106,7 +108,22 @@ export async function getSessions(
 ) {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
+  return getSessionsUsingClient(
+    supabase,
+    studioId,
+    startDate,
+    endDate,
+    classId
+  );
+}
 
+export async function getSessionsUsingClient(
+  supabase: SupabaseClient,
+  studioId: string,
+  startDate: string,
+  endDate: string,
+  classId?: string
+) {
   // Step 1: Fetch all recurring sessions in a single query
   let recurringQuery = supabase
     .from("class_sessions")

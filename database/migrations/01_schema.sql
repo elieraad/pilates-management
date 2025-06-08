@@ -11,7 +11,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Studios table
-CREATE TABLE studios (
+CREATE TABLE IF NOT EXISTS studios (
   id UUID REFERENCES auth.users NOT NULL PRIMARY KEY,
   name TEXT NOT NULL,
   address TEXT NOT NULL,
@@ -22,37 +22,41 @@ CREATE TABLE studios (
   logo_url TEXT,
   latitude NUMERIC,
   longitude NUMERIC,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CREATEd_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Index on studios email for faster lookups
-CREATE INDEX idx_studios_email ON studios(email);
+CREATE INDEX IF NOT EXISTS idx_studios_email ON studios(email);
 
 -- Enable Row Level Security
 ALTER TABLE studios ENABLE ROW LEVEL SECURITY;
 
--- Create policies
+-- CREATE policies
+DROP POLICY IF EXISTS "Studios can view their own profile" ON studios;
 CREATE POLICY "Studios can view their own profile" ON studios
   FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Studios can update their own profile" ON studios;
 CREATE POLICY "Studios can update their own profile" ON studios
   FOR UPDATE USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Studios can insert their own profile" ON studios;
 CREATE POLICY "Studios can insert their own profile" ON studios
-  FOR INSERT USING (auth.uid() = id);
+  FOR INSERT WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Public can view studios data" ON studios;
 CREATE POLICY "Public can view studios data" ON studios
   FOR SELECT USING (true);
 
 -- Trigger for updated_at
-CREATE TRIGGER set_studios_updated_at
+CREATE OR REPLACE TRIGGER set_studios_updated_at
   BEFORE UPDATE ON studios
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Licenses table
-CREATE TABLE licenses (
+CREATE TABLE IF NOT EXISTS licenses (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   studio_id UUID REFERENCES studios(id) NOT NULL,
   license_type TEXT NOT NULL CHECK (license_type IN ('monthly', 'yearly')),
@@ -60,30 +64,31 @@ CREATE TABLE licenses (
   end_date TIMESTAMPTZ NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   payment_reference TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CREATEd_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Indexes for faster license lookups
-CREATE INDEX idx_licenses_studio_id ON licenses(studio_id);
-CREATE INDEX idx_licenses_active_end_date ON licenses(studio_id, is_active, end_date) 
+CREATE INDEX IF NOT EXISTS idx_licenses_studio_id ON licenses(studio_id);
+CREATE INDEX IF NOT EXISTS idx_licenses_active_end_date ON licenses(studio_id, is_active, end_date) 
   WHERE is_active = TRUE;
 
 -- Enable Row Level Security
 ALTER TABLE licenses ENABLE ROW LEVEL SECURITY;
 
--- Create policies
+-- CREATE policies
+DROP POLICY IF EXISTS "Studios can view their own licenses" ON licenses;
 CREATE POLICY "Studios can view their own licenses" ON licenses
   FOR SELECT USING (auth.uid() = studio_id);
 
 -- Trigger for updated_at
-CREATE TRIGGER set_licenses_updated_at
+CREATE OR REPLACE TRIGGER set_licenses_updated_at
   BEFORE UPDATE ON licenses
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Classes table
-CREATE TABLE classes (
+CREATE TABLE IF NOT EXISTS classes (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   studio_id UUID REFERENCES studios(id) NOT NULL,
   name TEXT NOT NULL,
@@ -93,33 +98,35 @@ CREATE TABLE classes (
   price NUMERIC(10, 2) NOT NULL,
   instructor TEXT NOT NULL,
   is_cancelled BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CREATEd_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Indexes for classes
-CREATE INDEX idx_classes_studio_id ON classes(studio_id);
-CREATE INDEX idx_classes_active ON classes(studio_id, is_cancelled) 
+CREATE INDEX IF NOT EXISTS idx_classes_studio_id ON classes(studio_id);
+CREATE INDEX IF NOT EXISTS idx_classes_active ON classes(studio_id, is_cancelled) 
   WHERE is_cancelled = FALSE;
 
 -- Enable Row Level Security
 ALTER TABLE classes ENABLE ROW LEVEL SECURITY;
 
--- Create policies
+-- CREATE policies
+DROP POLICY IF EXISTS "Studios can manage their own classes" ON classes;
 CREATE POLICY "Studios can manage their own classes" ON classes
   FOR ALL USING (auth.uid() = studio_id);
 
+DROP POLICY IF EXISTS "Public can view all classes" on classes;
 CREATE POLICY "Public can view all classes" on classes
   FOR SELECT USING (true);
 
 -- Trigger for updated_at
-CREATE TRIGGER set_classes_updated_at
+CREATE OR REPLACE TRIGGER set_classes_updated_at
   BEFORE UPDATE ON classes
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Class Sessions table
-CREATE TABLE class_sessions (
+CREATE TABLE IF NOT EXISTS class_sessions (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   class_id UUID REFERENCES classes(id) NOT NULL,
   studio_id UUID REFERENCES studios(id) NOT NULL,
@@ -128,68 +135,73 @@ CREATE TABLE class_sessions (
   recurring_pattern TEXT, -- 'daily', 'weekly', 'biweekly', 'monthly', 'custom'
   custom_recurrence JSONB, -- Store days of week, end date, etc.
   is_cancelled BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CREATEd_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Indexes for faster session queries
-CREATE INDEX idx_sessions_studio_id ON class_sessions(studio_id);
-CREATE INDEX idx_sessions_class_id ON class_sessions(class_id);
-CREATE INDEX idx_sessions_start_time ON class_sessions(start_time);
-CREATE INDEX idx_sessions_active ON class_sessions(studio_id, is_cancelled, start_time) 
+CREATE INDEX IF NOT EXISTS idx_sessions_studio_id ON class_sessions(studio_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_class_id ON class_sessions(class_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_start_time ON class_sessions(start_time);
+CREATE INDEX IF NOT EXISTS idx_sessions_active ON class_sessions(studio_id, is_cancelled, start_time) 
   WHERE is_cancelled = FALSE;
-CREATE INDEX idx_sessions_recurring ON class_sessions(is_recurring);
+CREATE INDEX IF NOT EXISTS idx_sessions_recurring ON class_sessions(is_recurring);
 
 -- Enable Row Level Security
 ALTER TABLE class_sessions ENABLE ROW LEVEL SECURITY;
 
--- Create policies
+-- CREATE policies
+DROP POLICY IF EXISTS "Studios can manage their own class sessions" ON class_sessions;
 CREATE POLICY "Studios can manage their own class sessions" ON class_sessions
   FOR ALL USING (auth.uid() = studio_id);
 
+DROP POLICY IF EXISTS "Public can view non-cancelled class sessions" ON class_sessions;
 CREATE POLICY "Public can view non-cancelled class sessions" ON class_sessions
   FOR SELECT USING (is_cancelled = FALSE);
 
 -- Trigger for updated_at
-CREATE TRIGGER set_class_sessions_updated_at
+CREATE OR REPLACE TRIGGER set_class_sessions_updated_at
   BEFORE UPDATE ON class_sessions
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Session Exceptions table
-CREATE TABLE session_exceptions (
+CREATE TABLE IF NOT EXISTS session_exceptions (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   recurring_session_id UUID REFERENCES class_sessions(id) NOT NULL,
   studio_id UUID REFERENCES studios(id) NOT NULL,
   original_date TIMESTAMPTZ NOT NULL, -- The original date this would have occurred
   exception_type TEXT NOT NULL, -- 'cancelled', 'modified'
   modified_start_time TIMESTAMPTZ, -- Only populated for 'modified' type
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CREATEd_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Indexes for session exceptions
-CREATE INDEX idx_exceptions_recurring_session ON session_exceptions(recurring_session_id);
-CREATE INDEX idx_exceptions_date ON session_exceptions(original_date);
-CREATE INDEX idx_exceptions_studio_session_date ON session_exceptions(studio_id, recurring_session_id, original_date);
+CREATE INDEX IF NOT EXISTS idx_exceptions_recurring_session ON session_exceptions(recurring_session_id);
+CREATE INDEX IF NOT EXISTS idx_exceptions_date ON session_exceptions(original_date);
+CREATE INDEX IF NOT EXISTS idx_exceptions_studio_session_date ON session_exceptions(studio_id, recurring_session_id, original_date);
 
 -- Enable Row Level Security
 ALTER TABLE session_exceptions ENABLE ROW LEVEL SECURITY;
 
--- Create policies
+-- CREATE policies
+DROP POLICY IF EXISTS "Studios can manage their own class exceptions" ON session_exceptions;
 CREATE POLICY "Studios can manage their own class exceptions" ON session_exceptions
   FOR ALL USING (auth.uid() = studio_id);
 
+DROP POLICY IF EXISTS "Public can view session exceptions" ON session_exceptions;
 CREATE POLICY "Public can view session exceptions" ON session_exceptions
   FOR SELECT USING (true);
+
 -- Trigger for updated_at
-CREATE TRIGGER set_session_exceptions_updated_at
+CREATE OR REPLACE TRIGGER set_session_exceptions_updated_at
   BEFORE UPDATE ON session_exceptions
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Bookings table
-CREATE TABLE bookings (
+CREATE TABLE IF NOT EXISTS bookings (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   class_session_id UUID REFERENCES class_sessions(id) NOT NULL,
   studio_id UUID REFERENCES studios(id) NOT NULL,
@@ -200,37 +212,36 @@ CREATE TABLE bookings (
   payment_status TEXT NOT NULL CHECK (payment_status IN ('paid', 'unpaid', 'refunded')),
   amount NUMERIC(10, 2) NOT NULL,
   session_date DATE NOT NULL, -- Store the specific date for recurring sessions
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CREATEd_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   -- Add a unique constraint to prevent double bookings (for the same occurrence)
   CONSTRAINT unique_client_session_date UNIQUE (class_session_id, client_email, session_date)
 );
 
 -- Indexes for faster booking lookups
-CREATE INDEX idx_bookings_studio_id ON bookings(studio_id);
-CREATE INDEX idx_bookings_session_id ON bookings(class_session_id);
-CREATE INDEX idx_bookings_client_email ON bookings(client_email);
-CREATE INDEX idx_bookings_status ON bookings(status);
-CREATE INDEX idx_bookings_session_date ON bookings(session_date);
-CREATE INDEX idx_bookings_studio_status ON bookings(studio_id, status);
-CREATE INDEX idx_bookings_session_status ON bookings(class_session_id, status) 
+CREATE INDEX IF NOT EXISTS idx_bookings_studio_id ON bookings(studio_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_session_id ON bookings(class_session_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_client_email ON bookings(client_email);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
+CREATE INDEX IF NOT EXISTS idx_bookings_session_date ON bookings(session_date);
+CREATE INDEX IF NOT EXISTS idx_bookings_studio_status ON bookings(studio_id, status);
+CREATE INDEX IF NOT EXISTS idx_bookings_session_status ON bookings(class_session_id, status) 
   WHERE status != 'cancelled';
 
 -- Enable Row Level Security
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 
--- Create policies
+-- CREATE policies
+DROP POLICY IF EXISTS "Studios can manage bookings for their classes" ON bookings;
 CREATE POLICY "Studios can manage bookings for their classes" ON bookings
   FOR ALL USING (auth.uid() = studio_id);
 
+DROP POLICY IF EXISTS "Public can add bookings" ON bookings;
 CREATE POLICY "Public can add bookings" ON bookings
-  FOR INSERT USING (true);
-
-CREATE POLICY "Public can view bookings" ON bookings
-  FOR SELECT USING (true);
+  FOR INSERT WITH CHECK (true);
 
 -- Trigger for updated_at
-CREATE TRIGGER set_bookings_updated_at
+CREATE OR REPLACE TRIGGER set_bookings_updated_at
   BEFORE UPDATE ON bookings
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();

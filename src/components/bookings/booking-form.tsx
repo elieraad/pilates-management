@@ -4,13 +4,13 @@ import { useState, useEffect } from "react";
 import { useBookings } from "@/lib/hooks/use-bookings";
 import { useClasses } from "@/lib/hooks/use-classes";
 import { Class } from "@/types/class.types";
-import { BookingWithClient } from "@/types/booking.types";
+import { BookingSession } from "@/types/booking.types";
 import Input from "../ui/input";
 import Select from "../ui/select";
 import Button from "../ui/button";
 
 type BookingFormProps = {
-  initialData: BookingWithClient;
+  initialData: BookingSession;
   onSuccess?: () => void;
   onCancel?: () => void;
   preselectedClassId?: string;
@@ -35,9 +35,9 @@ const BookingForm = ({
     class_id: preselectedClassId || initialData?.class_session?.class_id || "",
     class_session_id:
       preselectedSessionId || initialData?.class_session_id || "",
-    client_name: initialData?.client_name || "",
-    client_email: initialData?.client_email || "",
-    client_phone: initialData?.client_phone || "",
+    client_name: initialData?.client.name || "",
+    client_email: initialData?.client.email || "",
+    client_phone: initialData?.client.phone || "",
     status: initialData?.status || "confirmed",
     payment_status: initialData?.payment_status || "paid",
     amount: initialData?.amount || 0,
@@ -115,9 +115,11 @@ const BookingForm = ({
       await updateBooking.mutateAsync({
         id: initialData.id,
         data: {
-          client_name: formData.client_name,
-          client_email: formData.client_email,
-          client_phone: formData.client_phone || null,
+          client: {
+            name: formData.client_name,
+            email: formData.client_email,
+            phone: formData.client_phone,
+          },
           status: formData.status as "confirmed" | "pending" | "cancelled",
           payment_status: formData.payment_status as
             | "paid"

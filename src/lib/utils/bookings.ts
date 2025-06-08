@@ -1,9 +1,9 @@
-import { BookingWithClient } from "@/types/booking.types";
+import { BookingSession } from "@/types/booking.types";
 import { cookies } from "next/headers";
 import { createClient } from "../supabase/server";
 
 export async function computeBookingsWithSessionDate(
-  bookings: BookingWithClient[]
+  bookings: BookingSession[]
 ) {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
