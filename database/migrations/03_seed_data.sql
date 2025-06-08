@@ -14,11 +14,11 @@ INSERT INTO studios (
   opening_hours
 ) VALUES (
   'YOUR_TEST_AUTH_USER_ID', -- Replace with actual UUID
-  'Pure Pilates Studio',
+  'Pure Fitness Studio',
   '123 Serenity Ave, Downtown',
   '(555) 123-4567',
   'demo@example.com',
-  'A boutique Pilates studio offering reformer and mat classes for all levels.',
+  'A boutique Fitness studio offering reformer and mat classes for all levels.',
   'Mon-Fri: 6am-8pm, Sat-Sun: 8am-6pm'
 );
 
@@ -58,8 +58,8 @@ INSERT INTO classes (
 ),
 (
   'YOUR_TEST_AUTH_USER_ID', -- Replace with actual UUID
-  'Mat Pilates',
-  'Classic Pilates exercises performed on a mat. Focus on core strength and flexibility.',
+  'Mat Fitness',
+  'Classic Fitness exercises performed on a mat. Focus on core strength and flexibility.',
   45,
   15,
   25.00,
@@ -67,8 +67,8 @@ INSERT INTO classes (
 ),
 (
   'YOUR_TEST_AUTH_USER_ID', -- Replace with actual UUID
-  'Prenatal Pilates',
-  'Gentle Pilates exercises designed specifically for expectant mothers.',
+  'Prenatal Fitness',
+  'Gentle Fitness exercises designed specifically for expectant mothers.',
   45,
   8,
   30.00,
@@ -87,8 +87,8 @@ DECLARE
 BEGIN
   -- Get class IDs
   SELECT id INTO reformer_id FROM classes WHERE name = 'Reformer Flow' AND studio_id = studio_id;
-  SELECT id INTO mat_id FROM classes WHERE name = 'Mat Pilates' AND studio_id = studio_id;
-  SELECT id INTO prenatal_id FROM classes WHERE name = 'Prenatal Pilates' AND studio_id = studio_id;
+  SELECT id INTO mat_id FROM classes WHERE name = 'Mat Fitness' AND studio_id = studio_id;
+  SELECT id INTO prenatal_id FROM classes WHERE name = 'Prenatal Fitness' AND studio_id = studio_id;
   
   -- Create recurring Monday/Wednesday/Friday morning Reformer sessions
   INSERT INTO class_sessions (

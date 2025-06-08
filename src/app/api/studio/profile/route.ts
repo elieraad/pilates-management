@@ -67,8 +67,6 @@ export async function PUT(request: NextRequest) {
         description: body.description,
         opening_hours: body.opening_hours,
         logo_url: body.logo_url,
-        latitude: body.latitude,
-        longitude: body.longitude,
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id)

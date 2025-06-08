@@ -24,7 +24,7 @@ export default async function HomePage() {
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center">
-            <h1 className="text-2xl font-serif text-olive-900">pilates</h1>
+            <h1 className="text-2xl font-serif text-olive-900">fitness</h1>
             <p className="hidden sm:block text-sm text-olive-700 italic ml-2">
               studio management
             </p>
@@ -49,11 +49,11 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 py-8 text-center">
           <div className="max-w-2xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-serif text-olive-900 mb-4 leading-tight">
-              Streamline Your Pilates Studio
+              Streamline Your Fitness Studio
             </h1>
             <p className="text-lg text-gray-700 mb-8 max-w-xl mx-auto">
               Simplify scheduling, bookings, and client management with our
-              all-in-one platform designed specifically for Pilates studios.
+              all-in-one platform designed specifically for Fitness studios.
             </p>
 
             {/* Feature Highlights for Mobile */}
@@ -97,7 +97,7 @@ export default async function HomePage() {
       <footer className="bg-white border-t border-gray-100">
         <div className="container mx-auto px-4 py-6 text-center">
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Pilates Studio Management
+            © {new Date().getFullYear()} Fitness Studio Management
           </p>
         </div>
       </footer>

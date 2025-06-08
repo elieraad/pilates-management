@@ -4,7 +4,7 @@ import ProfileForm from "@/components/settings/profile-form";
 import BookingShareComponent from "@/components/settings/bookings-share";
 
 export const metadata = {
-  title: "Settings | Pilates Studio Management",
+  title: "Settings | Fitness Studio Management",
   description: "Manage your studio profile and settings",
 };
 

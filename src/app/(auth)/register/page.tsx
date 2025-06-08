@@ -1,7 +1,7 @@
 import RegisterForm from "@/components/auth/register-form";
 
 export const metadata = {
-  title: "Register | Pilates Studio Management",
+  title: "Register | Fitness Studio Management",
 };
 
 export default function RegisterPage() {

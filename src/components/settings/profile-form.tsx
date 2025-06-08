@@ -20,9 +20,7 @@ const ProfileForm = ({ initialData }: ProfileFormProps) => {
     phone: initialData.phone || "",
     email: initialData.email || "",
     description: initialData.description || "",
-    opening_hours: initialData.opening_hours || "",
-    latitude: initialData.latitude || "",
-    longitude: initialData.longitude || "",
+    opening_hours: initialData.opening_hours || ""
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -74,12 +72,6 @@ const ProfileForm = ({ initialData }: ProfileFormProps) => {
         phone: formData.phone || undefined,
         description: formData.description || undefined,
         opening_hours: formData.opening_hours || undefined,
-        latitude: formData.latitude
-          ? parseFloat(formData.latitude as string)
-          : undefined,
-        longitude: formData.longitude
-          ? parseFloat(formData.longitude as string)
-          : undefined,
       });
     } catch (error) {
       console.error("Profile update error:", error);
@@ -140,22 +132,6 @@ const ProfileForm = ({ initialData }: ProfileFormProps) => {
           className="w-full p-2 border border-gray-200 rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-olive-200"
           placeholder="A brief description of your studio..."
           value={formData.description}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          label="Latitude (optional)"
-          name="latitude"
-          value={formData.latitude}
-          onChange={handleChange}
-        />
-
-        <Input
-          label="Longitude (optional)"
-          name="longitude"
-          value={formData.longitude}
           onChange={handleChange}
         />
       </div>

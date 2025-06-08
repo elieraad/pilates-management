@@ -1,6 +1,6 @@
-# Pilates Studio Management
+# Fitness Studio Management
 
-A complete management platform for Pilates studios, built with Next.js and Supabase.
+A complete management platform for Fitness studios, built with Next.js and Supabase.
 
 ## Features
 

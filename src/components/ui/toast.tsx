@@ -5,7 +5,6 @@ import {
   useContext,
   ReactNode,
   useState,
-  useCallback,
   useEffect,
 } from "react";
 import { X } from "lucide-react";
@@ -37,21 +36,18 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     return () => setIsMounted(false);
   }, []);
 
-  const dismissToast = useCallback((id: string) => {
+  const dismissToast = (id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  }, []);
+  };
 
-  const toast = useCallback(
-    ({ title, description, type }: Omit<Toast, "id">) => {
-      const id = crypto.randomUUID();
-      setToasts((prev) => [...prev, { id, title, description, type }]);
+  const toast = ({ title, description, type }: Omit<Toast, "id">) => {
+    const id = crypto.randomUUID();
+    setToasts((prev) => [...prev, { id, title, description, type }]);
 
-      setTimeout(() => {
-        dismissToast(id);
-      }, 5000);
-    },
-    [dismissToast]
-  );
+    setTimeout(() => {
+      dismissToast(id);
+    }, 5000);
+  };
 
   const toastContainer = (
     <div className="fixed bottom-0 left-0 right-0 md:bottom-4 md:right-4 md:left-auto z-100 flex flex-col gap-2 p-2 pointer-events-none">

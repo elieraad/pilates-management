@@ -51,7 +51,7 @@ const RegisterForm = () => {
   return (
     <div className="max-w-lg w-full mx-auto">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-serif text-olive-900 mb-2">pilates</h1>
+        <h1 className="text-3xl font-serif text-olive-900 mb-2">fitness</h1>
         <p className="text-olive-700 italic">studio management</p>
       </div>
 
@@ -73,7 +73,7 @@ const RegisterForm = () => {
           <Input
             label="Studio Name"
             name="name"
-            placeholder="Pure Pilates Studio"
+            placeholder="Pure Fitness Studio"
             value={studioData.name}
             onChange={handleChange}
             required

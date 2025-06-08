@@ -8,10 +8,10 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: {
-    default: "Pilates Studio Management",
-    template: "%s | Pilates Studio Management",
+    default: "Fitness Studio Management",
+    template: "%s | Fitness Studio Management",
   },
-  description: "A complete studio management platform for Pilates studios",
+  description: "A complete studio management platform for Fitness studios",
 };
 
 export default function RootLayout({

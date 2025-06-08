@@ -1,6 +1,6 @@
 # Database Setup Guide
 
-This directory contains all the SQL scripts needed to set up the Pilates Studio Management database in Supabase.
+This directory contains all the SQL scripts needed to set up the Fitness Studio Management database in Supabase.
 
 ## Structure
 
@@ -40,7 +40,7 @@ supabase db push --db-url postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT
 ## Database Schema
 
 ### Studios
-- Represents the Pilates studio businesses
+- Represents the Fitness studio businesses
 - Has direct relationship with auth.users
 
 ### Licenses
@@ -49,7 +49,7 @@ supabase db push --db-url postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT
 
 ### Classes
 - Represents the types of classes offered by studios
-- E.g., "Reformer Flow", "Mat Pilates", etc.
+- E.g., "Reformer Flow", "Mat Fitness", etc.
 
 ### Class Sessions
 - Specific instances of classes scheduled at particular times

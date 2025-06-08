@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 type PublicNavbarProps = {
   studioName: string;
@@ -56,21 +57,21 @@ const PublicNavbar = ({ studioName, studioLogo }: PublicNavbarProps) => {
 
           {/* Desktop Menu */}
           <nav className="hidden md:flex items-center space-x-6">
-            <a href="#classes" className="text-olive-800 hover:text-olive-600">
+            <Link href="#classes" className="text-olive-800 hover:text-olive-600">
               Classes
-            </a>
-            <a href="#about" className="text-olive-800 hover:text-olive-600">
+            </Link>
+            <Link href="#about" className="text-olive-800 hover:text-olive-600">
               About
-            </a>
-            <a href="#contact" className="text-olive-800 hover:text-olive-600">
+            </Link>
+            <Link href="#contact" className="text-olive-800 hover:text-olive-600">
               Contact
-            </a>
-            <a
+            </Link>
+            <Link
               href="#book"
               className="px-4 py-2 bg-olive-600 text-white rounded-lg hover:bg-olive-700 transition-colors"
             >
               Book Now
-            </a>
+            </Link>
           </nav>
         </div>
       </div>
@@ -79,34 +80,34 @@ const PublicNavbar = ({ studioName, studioLogo }: PublicNavbarProps) => {
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-4 space-y-1 bg-white shadow-lg">
-            <a
+            <Link
               href="#classes"
               className="block px-3 py-2 rounded-md text-base font-medium text-olive-800 hover:bg-olive-50"
               onClick={() => setIsMenuOpen(false)}
             >
               Classes
-            </a>
-            <a
+            </Link>
+            <Link
               href="#about"
               className="block px-3 py-2 rounded-md text-base font-medium text-olive-800 hover:bg-olive-50"
               onClick={() => setIsMenuOpen(false)}
             >
               About
-            </a>
-            <a
+            </Link>
+            <Link
               href="#contact"
               className="block px-3 py-2 rounded-md text-base font-medium text-olive-800 hover:bg-olive-50"
               onClick={() => setIsMenuOpen(false)}
             >
               Contact
-            </a>
-            <a
+            </Link>
+            <Link
               href="#book"
               className="block px-3 py-2 text-center bg-olive-600 text-white rounded-md text-base font-medium hover:bg-olive-700 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Book Now
-            </a>
+            </Link>
           </div>
         </div>
       )}

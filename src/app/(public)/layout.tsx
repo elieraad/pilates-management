@@ -2,10 +2,10 @@ import { ReactNode } from "react";
 
 export const metadata = {
   title: {
-    default: "Pilates Studio Booking",
-    template: "%s | Pilates Studio",
+    default: "Fitness Studio Booking",
+    template: "%s | Fitness Studio",
   },
-  description: "Book your pilates classes online",
+  description: "Book your fitness classes online",
 };
 
 export default function PublicLayout({ children }: { children: ReactNode }) {

@@ -1,5 +1,5 @@
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Button from "./button";
 
 export const DatePicker = ({
@@ -11,26 +11,25 @@ export const DatePicker = ({
 }) => {
   const datePickerRef = useRef<HTMLDivElement>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
-  // Optimized date selection functions (with useCallback)
-  const goToPreviousDay = useCallback(() => {
+  const goToPreviousDay = () => {
     setSelectedDate((prevDate) => {
       const newDate = new Date(prevDate);
       newDate.setDate(newDate.getDate() - 1);
       return newDate;
     });
-  }, []);
+  };
 
-  const goToNextDay = useCallback(() => {
+  const goToNextDay = () => {
     setSelectedDate((prevDate) => {
       const newDate = new Date(prevDate);
       newDate.setDate(newDate.getDate() + 1);
       return newDate;
     });
-  }, []);
+  };
 
-  const goToToday = useCallback(() => {
+  const goToToday = () => {
     setSelectedDate(new Date());
-  }, []);
+  };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(new Date(e.target.value));

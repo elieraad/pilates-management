@@ -3,7 +3,7 @@
 import LicenseInfo from "@/components/settings/license-info";
 
 export const metadata = {
-  title: "License Management | Pilates Studio Management",
+  title: "License Management | Fitness Studio Management",
   description: "Manage your subscription and licensing",
 };
 

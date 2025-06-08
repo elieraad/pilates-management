@@ -18,6 +18,7 @@ import { useStudioAuth } from "../providers";
 import { useStudio } from "@/lib/hooks/use-studio";
 import Modal from "../ui/modal";
 import Button from "../ui/button";
+import Link from "next/link";
 
 const MIN_LOADING_TIME = 300;
 const LOADING_DELAY = 100;
@@ -158,10 +159,10 @@ const Sidebar = () => {
   const renderNavigation = () => (
     <nav className="flex-1 pt-4">
       <div className="p-4 border-b border-gray-100 text-center hidden md:block">
-        <h1 className="text-xl font-serif text-olive-900">pilates</h1>
+        <h1 className="text-xl font-serif text-olive-900">fitness</h1>
         <p className="text-xs text-olive-700 italic">studio management</p>
       </div>
-      <a
+      <Link
         href="/dashboard"
         onClick={handleNavigation("/dashboard")}
         className={`w-full flex items-center p-3 md:px-4 ${
@@ -177,8 +178,8 @@ const Sidebar = () => {
         {navigatingTo === "/dashboard" && (
           <LoaderCircle className="hidden md:inline-block ml-2 h-4 w-4 animate-spin"></LoaderCircle>
         )}
-      </a>
-      <a
+      </Link>
+      <Link
         href="/classes"
         onClick={handleNavigation("/classes")}
         className={`w-full flex items-center p-3 md:px-4 ${
@@ -194,8 +195,8 @@ const Sidebar = () => {
         {navigatingTo === "/classes" && (
           <LoaderCircle className="hidden md:inline-block ml-2 h-4 w-4 animate-spin"></LoaderCircle>
         )}
-      </a>
-      <a
+      </Link>
+      <Link
         href="/bookings"
         onClick={handleNavigation("/bookings")}
         className={`w-full flex items-center p-3 md:px-4 ${
@@ -211,8 +212,8 @@ const Sidebar = () => {
         {navigatingTo === "/bookings" && (
           <LoaderCircle className="hidden md:inline-block ml-2 h-4 w-4 animate-spin"></LoaderCircle>
         )}
-      </a>
-      <a
+      </Link>
+      <Link
         href="/settings"
         onClick={handleNavigation("/settings")}
         className={`w-full flex items-center p-3 md:px-4 ${
@@ -228,7 +229,7 @@ const Sidebar = () => {
         {navigatingTo === "/settings" && (
           <LoaderCircle className="hidden md:inline-block ml-2 h-4 w-4 animate-spin"></LoaderCircle>
         )}
-      </a>
+      </Link>
     </nav>
   );
 
@@ -290,7 +291,7 @@ const Sidebar = () => {
       {/* Hamburger Menu for Mobile */}
       <div className="md:hidden fixed top-0 left-0 right-0 bg-white shadow-sm z-40 flex justify-between items-center p-4">
         <div className="flex items-center">
-          <h1 className="text-xl font-serif text-olive-900 ml-2">pilates</h1>
+          <h1 className="text-xl font-serif text-olive-900 ml-2">fitness</h1>
         </div>
         <button
           onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
@@ -320,7 +321,7 @@ const Sidebar = () => {
         <div className="h-full flex flex-col">
           {/* Mobile Header */}
           <div className="md:hidden p-4 border-b border-gray-100 flex justify-between items-center">
-            <h1 className="text-xl font-serif text-olive-900">pilates</h1>
+            <h1 className="text-xl font-serif text-olive-900">fitness</h1>
             <button
               onClick={() => setIsMobileSidebarOpen(false)}
               className="text-olive-600"

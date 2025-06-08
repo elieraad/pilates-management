@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Calendar,
   Clock,
@@ -67,13 +67,15 @@ export default function StudioPublicPage({
 
   const studioId = URLSafeUUIDShortener.decode(params.studioId);
   const [studio, setStudio] = useState<Studio | null>(null);
-  const [availableDates] = useState<string[]>(
-    Array.from({ length: days }, (_, i) => {
+
+  const availableDates = useMemo(() => {
+    return Array.from({ length: 30 }, (_, i) => {
       const futureDate = new Date();
-      futureDate.setDate(startDate.getDate() + i + 2);
+      futureDate.setDate(futureDate.getDate() + i + 2);
       return futureDate.toISOString().split("T")[0];
-    })
-  );
+    });
+  }, []);
+
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     const futureDate = new Date();
     futureDate.setDate(startDate.getDate() + 2);
@@ -197,7 +199,7 @@ export default function StudioPublicPage({
   };
 
   // Get sessions for selected date grouped by class
-  const getSessionsForSelectedDate = () => {
+  const classesWithSessions = useMemo(() => {
     const classIds = Object.keys(sessionsByClassId);
 
     const filteredData = classIds
@@ -226,7 +228,7 @@ export default function StudioPublicPage({
       .filter((x) => x !== null);
 
     return filteredData;
-  };
+  }, [sessionsByClassId, selectedDate]);
 
   if (!loading && !studio) {
     return (
@@ -296,8 +298,6 @@ export default function StudioPublicPage({
       </div>
     );
   };
-
-  const classesWithSessions = getSessionsForSelectedDate();
 
   return (
     <div className="min-h-screen bg-olive-50">

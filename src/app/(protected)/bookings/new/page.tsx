@@ -5,7 +5,7 @@ import BookingCreationForm from "@/components/bookings/booking-creation-form";
 import { getBookingCount } from "@/lib/utils/bookings";
 
 export const metadata = {
-  title: "Create Booking | Pilates Studio Management",
+  title: "Create Booking | Fitness Studio Management",
   description: "Create a new booking for a class session",
 };
 

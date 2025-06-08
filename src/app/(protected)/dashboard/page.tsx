@@ -6,7 +6,7 @@ import { computeBookingsWithSessionDate } from "@/lib/utils/bookings";
 import StatsCards from "@/components/dashboard/stats-cards";
 
 export const metadata = {
-  title: "Dashboard | Pilates Studio Management",
+  title: "Dashboard | Fitness Studio Management",
   description: "View your studio performance at a glance",
 };
 
