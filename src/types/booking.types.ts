@@ -6,7 +6,7 @@ export interface Client {
   id?: string;
   name: string;
   email: string;
-  phone?: string;
+  phone: string | null;
 }
 export interface Booking {
   id: string;

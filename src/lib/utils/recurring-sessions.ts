@@ -155,8 +155,8 @@ export async function getSessionsUsingClient(
     .from("session_exceptions")
     .select("*")
     .eq("studio_id", studioId)
-    .gte("original_date", startDate)
-    .lte("original_date", endDate);
+    .gte("start_time", startDate)
+    .lte("start_time", endDate);
 
   // Run all queries in parallel
   let [
@@ -187,7 +187,7 @@ export async function getSessionsUsingClient(
     const sessionExceptions = exceptions
       .filter((e) => e.recurring_session_id === session.id)
       .reduce((map, exception) => {
-        const dateStr = new Date(exception.original_date).toDateString();
+        const dateStr = new Date(exception.start_time).toDateString();
         map[dateStr] = exception;
         return map;
       }, {});
@@ -207,7 +207,7 @@ export async function getSessionsUsingClient(
           expandedSessions.push({
             ...session,
             start_time: exception.modified_start_time,
-            original_date: exception.original_date,
+            start_time: exception.start_time,
             is_exception: true,
             bookings_count: 0, // We'll fill this later
           });
@@ -228,7 +228,7 @@ export async function getSessionsUsingClient(
         expandedSessions.push({
           ...session,
           start_time: originalDate,
-          original_date: originalDate,
+          start_time: originalDate,
           bookings_count: 0, // We'll fill this later
         });
       }
@@ -240,7 +240,7 @@ export async function getSessionsUsingClient(
     const sessionDate = session.start_time.split("T")[0];
     allSessionDates.push({ sessionId: session.id, date: sessionDate });
 
-    session.original_date = session.start_time;
+    session.start_time = session.start_time;
     session.bookings_count = 0; // We'll fill this later
   }
 

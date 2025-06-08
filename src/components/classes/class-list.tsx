@@ -215,7 +215,7 @@ const ClassList = () => {
       if (selectedOccurrence.is_recurring) {
         await modifyOccurrence.mutateAsync({
           recurringSessionId: selectedOccurrence.id,
-          originalDate: selectedOccurrence.original_date,
+          originalDate: selectedOccurrence.start_time,
           newStartTime,
         });
       } else {
@@ -243,7 +243,7 @@ const ClassList = () => {
       if (selectedOccurrence.is_recurring) {
         await cancelOccurrence.mutateAsync({
           recurringSessionId: selectedOccurrence.id,
-          originalDate: selectedOccurrence.original_date,
+          originalDate: selectedOccurrence.start_time,
         });
       } else {
         await cancelSession.mutateAsync(selectedOccurrence.id);

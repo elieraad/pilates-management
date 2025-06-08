@@ -4,6 +4,7 @@ import UpcomingClasses from "@/components/dashboard/upcoming-classes";
 import RecentBookings from "@/components/dashboard/recent-bookings";
 import { computeBookingsWithSessionDate } from "@/lib/utils/bookings";
 import StatsCards from "@/components/dashboard/stats-cards";
+import { BookingSession } from "@/types/booking.types";
 
 export const metadata = {
   title: "Dashboard | Fitness Studio Management",
@@ -59,7 +60,7 @@ export default async function DashboardPage() {
     })) || [];
 
   // Get recent bookings
-  const { data: recentBookings } = await supabase
+  const { data: bookings } = await supabase
     .from("bookings")
     .select(
       `
@@ -80,25 +81,29 @@ export default async function DashboardPage() {
     .order("created_at", { ascending: false })
     .limit(3);
 
-  if (recentBookings && recentBookings.length > 0) {
+  let recentBookings: BookingSession[] = [];
+  if (bookings && bookings.length > 0) {
+    recentBookings = bookings.map((b) => ({
+      ...b,
+      class_session: { ...b.class_session, start_time: b.session_date },
+    }));
     await computeBookingsWithSessionDate(recentBookings);
   }
 
   return (
     <div className="space-y-2">
       <h1 className="text-2xl font-serif text-olive-900">Dashboard</h1>
-  
+
       <div className="bg-white p-6 rounded-xl shadow-sm">
         <h2 className="text-xl font-serif text-olive-900 mb-4">
           Studio Overview
         </h2>
         <StatsCards />
       </div>
-  
+
       <UpcomingClasses classes={upcomingClasses} />
-  
-      <RecentBookings bookings={recentBookings || []} />
+
+      <RecentBookings bookings={recentBookings} />
     </div>
   );
-  
 }

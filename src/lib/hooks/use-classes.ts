@@ -66,7 +66,7 @@ export function useClasses() {
       },
       body: JSON.stringify({
         recurring_session_id: recurringSessionId,
-        original_date: originalDate,
+        start_time: originalDate,
         exception_type: "modified",
         modified_start_time: newStartTime,
       }),
@@ -91,7 +91,7 @@ export function useClasses() {
       },
       body: JSON.stringify({
         recurring_session_id: recurringSessionId,
-        original_date: originalDate,
+        start_time: originalDate,
         exception_type: "cancelled",
       }),
     });

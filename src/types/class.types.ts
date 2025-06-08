@@ -16,15 +16,15 @@ export interface ClassSession {
   class_id: string;
   studio_id: string;
   start_time: string;
-  original_date: string;
+  start_time: string;
   is_recurring: boolean;
   recurring_pattern: string | null;
   is_cancelled: boolean;
   created_at: string;
   updated_at: string;
   class: Class;
-  bookings_count: number;
-  is_exception: boolean;
+  bookings_count?: number;
+  is_exception?: boolean;
 }
 
 export interface CreateClassInput {

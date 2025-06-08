@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { validateLicense } from "@/lib/utils/license-validator";
+import { Client } from "@/types/booking.types";
 
 export const dynamic = "force-dynamic";
 
@@ -126,8 +127,7 @@ export async function PUT(
     const body = await request.json();
 
     let clientId = existingBooking.client_id;
-    const existingClient: { name: string; email: string; phone: string } =
-      existingBooking.client[0];
+    const existingClient: Client = existingBooking.client;
 
     // Handle client information update if provided
     if (body.client_name || body.client_email || body.client_phone) {

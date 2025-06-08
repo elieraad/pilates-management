@@ -30,10 +30,6 @@ export default async function NewBookingPage({
     redirect("/login");
   }
 
-  // Get session details if sessionId is provided
-  let sessionData = null;
-  let classData = null;
-
   if (!searchParams.sessionId) {
     redirect("/bookings");
   }
@@ -55,8 +51,13 @@ export default async function NewBookingPage({
     redirect("/bookings");
   }
 
-  sessionData = data;
-  classData = data.class;
+  const sessionData = {
+    ...data,
+    start_time: data.start_time,
+    bookings_count: 0,
+    is_exception: false,
+  };
+  const classData = data.class;
 
   // Check current bookings count if session is provided
   const currentBookings = await getBookingCount(

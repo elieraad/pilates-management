@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (
       !body.recurring_session_id ||
-      !body.original_date ||
+      !body.start_time ||
       !body.exception_type
     ) {
       return NextResponse.json(
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       .from("session_exceptions")
       .select("id")
       .eq("recurring_session_id", body.recurring_session_id)
-      .eq("original_date", body.original_date)
+      .eq("start_time", body.start_time)
       .maybeSingle();
 
     // If an exception exists, update it; otherwise create a new one
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         .insert({
           recurring_session_id: body.recurring_session_id,
           studio_id: user.id,
-          original_date: body.original_date,
+          start_time: body.start_time,
           exception_type: body.exception_type,
           modified_start_time:
             body.exception_type === "modified"

@@ -50,7 +50,7 @@ const EditSeriesModal = ({
       const [hours, minutes] = newStartTime.split(":").map(Number);
 
       // Create a new date object based on the original date but with the new time
-      const originalDate = new Date(session.original_date);
+      const originalDate = new Date(session.start_time);
       const updatedDateTime = new Date(originalDate);
       updatedDateTime.setHours(hours, minutes, 0, 0);
 
