@@ -312,4 +312,3 @@ $$ LANGUAGE plpgsql;
 ALTER TABLE bookings drop COLUMN client_name;
 ALTER TABLE bookings drop COLUMN client_email;
 ALTER TABLE bookings drop COLUMN client_phone;
-

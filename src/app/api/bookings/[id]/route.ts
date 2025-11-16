@@ -126,24 +126,24 @@ export async function PUT(
     const body = await request.json();
 
     let clientId = existingBooking.client_id;
-    const existingClient: { name: string; email: string; phone: string } =
-      existingBooking.client[0];
+    const existingClient = existingBooking.client;
 
     // Handle client information update if provided
-    if (body.client_name || body.client_email || body.client_phone) {
+    if (body.client.name || body.client.email || body.client.phone) {
       // Check if we need to update the existing client or create a new one
       const clientChanged =
-        body.client_name !== existingClient.name ||
-        body.client_email !== existingClient.email ||
-        body.client_phone !== existingClient.phone;
+        body.client.name !== existingClient.name ||
+        body.client.email !== existingClient.email ||
+        body.client.phone !== existingClient.phone;
 
       if (clientChanged) {
-        // First, check if a client with this email already exists for this studio
+        // First, check if a client already exists for this studio
         const { data: existingClient } = await supabase
           .from("clients")
           .select("id")
           .eq("studio_id", user.id)
-          .eq("email", body.client_email)
+          .eq("phone", body.client.phone)
+          .eq("email", body.client.email)
           .single();
 
         if (existingClient) {
@@ -151,8 +151,7 @@ export async function PUT(
           const { error: updateClientError } = await supabase
             .from("clients")
             .update({
-              name: body.client_name,
-              phone: body.client_phone || null,
+              name: body.client.name,
               updated_at: new Date().toISOString(),
             })
             .eq("id", existingClient.id);
@@ -165,9 +164,9 @@ export async function PUT(
             .from("clients")
             .insert({
               studio_id: user.id,
-              name: body.client_name,
-              email: body.client_email,
-              phone: body.client_phone || null,
+              name: body.client.name,
+              email: body.client.email,
+              phone: body.client.phone || null,
             })
             .select("id")
             .single();

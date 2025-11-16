@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useBookings } from "@/lib/hooks/use-bookings";
 import { useClasses } from "@/lib/hooks/use-classes";
-import { Class, ClassSession } from "@/types/class.types";
+import { Class } from "@/types/class.types";
 import Input from "../ui/input";
 import Select from "../ui/select";
 import Button from "../ui/button";
@@ -13,7 +13,6 @@ import { useToast } from "@/components/ui/toast";
 
 type BookingCreationFormProps = {
   preselectedSessionId: string;
-  sessionData?: ClassSession;
   classData?: Class;
   currentBookings?: number;
   sessionDate: string;
@@ -22,7 +21,6 @@ type BookingCreationFormProps = {
 
 const BookingCreationForm = ({
   preselectedSessionId,
-  sessionData,
   classData,
   currentBookings = 0,
   sessionDate,
@@ -37,7 +35,7 @@ const BookingCreationForm = ({
   const allClasses = useClassesQuery();
 
   const [formData, setFormData] = useState({
-    class_id: sessionData?.class_id || "",
+    class_id: classData?.id || "",
     class_session_id: preselectedSessionId || "",
     client_name: "",
     client_email: "",
@@ -171,11 +169,11 @@ const BookingCreationForm = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Session information if preselected */}
-      {sessionData && (
+      {classData && (
         <div className="bg-olive-50 p-4 rounded-lg mb-4">
           <h3 className="font-medium mb-1">Class Details</h3>
           <p>
-            <span className="font-medium">Class:</span> {sessionData.class.name}
+            <span className="font-medium">Class:</span> {classData.name}
           </p>
           <p>
             <span className="font-medium">Date & Time:</span>{" "}
@@ -183,16 +181,16 @@ const BookingCreationForm = ({
           </p>
           <p>
             <span className="font-medium">Instructor:</span>{" "}
-            {sessionData.class.instructor}
+            {classData.instructor}
           </p>
           <p>
             <span className="font-medium">Price:</span> $
-            {sessionData.class.price}
+            {classData.price}
           </p>
           <p>
             <span className="font-medium">Availability:</span>{" "}
             <span className={isFull ? "text-red-600 font-bold" : ""}>
-              {currentBookings}/{sessionData.class.capacity} spots filled
+              {currentBookings}/{classData.capacity} spots filled
             </span>
           </p>
 

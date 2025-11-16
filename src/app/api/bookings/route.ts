@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { validateLicense } from "@/lib/utils/license-validator";
-import { Booking, CreateBookingInput } from "@/types/booking.types";
+import { CreateBookingInput } from "@/types/booking.types";
 import { computeBookingsWithSessionDate } from "@/lib/utils/bookings";
 
 export const dynamic = "force-dynamic";
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
 
     // Filter by date range if specified
     if (validBookings.length > 0) {
-      validBookings = validBookings.filter((b: Booking) => {
+      validBookings = validBookings.filter((b) => {
         let valid = true;
 
         if (startDate) {
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
         p_status: body.status,
         p_payment_status: body.payment_status,
         p_amount: body.amount,
-        p_session_date: body.sessionDate || null,
+        p_session_date: body.sessionDate,
       }
     );
 
@@ -201,10 +201,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (transactionError) {
-      return NextResponse.json(
-        { error: transactionError },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: transactionError }, { status: 400 });
     }
 
     if (!result || result.length === 0) {
@@ -215,7 +212,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Use the correct column
-    const bookingId = result[0].booking_id;
+    const bookingId = Array.isArray(result)
+      ? result[0].booking_id
+      : (result as { booking_id: string }).booking_id;
 
     // Get the newly created booking with related data
     const { data: newBooking, error: fetchError } = await supabase

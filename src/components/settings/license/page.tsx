@@ -1,5 +1,3 @@
-// app/(protected)/settings/license/page.tsx
-
 import LicenseInfo from "@/components/settings/license-info";
 
 export const metadata = {

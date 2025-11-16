@@ -1,5 +1,3 @@
-// src/lib/hooks/use-media-query.ts
-
 import { useState, useEffect } from "react";
 
 /**

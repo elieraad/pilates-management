@@ -1,9 +1,12 @@
-import { BookingSession } from "@/types/booking.types";
 import { cookies } from "next/headers";
 import { createClient } from "../supabase/server";
 
 export async function computeBookingsWithSessionDate(
-  bookings: BookingSession[]
+  bookings: {
+    class_session_id: string;
+    session_date: string;
+    class_session: { start_time: string };
+  }[]
 ) {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
@@ -38,7 +41,11 @@ export async function computeBookingsWithSessionDate(
     const sessionDate = new Date(booking.session_date);
     let modifiedDate = new Date(booking.class_session.start_time);
 
-    if (exception && exception.exception_type === "modified") {
+    if (
+      exception &&
+      exception.exception_type === "modified" &&
+      exception.modified_start_time
+    ) {
       // Set the correct time to the booking's session_date
       // This is important for client-side time display
       modifiedDate = new Date(exception.modified_start_time);

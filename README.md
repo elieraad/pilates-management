@@ -2,7 +2,6 @@
 
 A complete management platform for Fitness studios, built with Next.js and Supabase.
 
-
 ## Running Supabase Locally
 
 You can run Supabase locally to develop and test your app without affecting production.
@@ -20,10 +19,10 @@ npx supabase start
 
 This spins up:
 
-* **Postgres database** (default port: `54322`)
-* **Auth API** (default port: `54321`)
-* **Realtime server**
-* **Storage server**
+- **Postgres database** (default port: `54322`)
+- **Auth API** (default port: `54321`)
+- **Realtime server**
+- **Storage server**
 
 Your app can now connect to Supabase locally using environment variables.
 
@@ -56,14 +55,24 @@ This applies all new migration files to your local database.
 
 ---
 
+### 5. Generate types
+
+```bash
+npx supabase gen types typescript --local > ./src/lib/supabase/types.ts
+```
+
+This will generate types for all db queries
+
+---
+
 ### 5. Stop Supabase
 
 ```bash
 npx supabase stop
 ```
 
-* Stops all local services.
-* Data persists in the `supabase/.local` folder for next time.
+- Stops all local services.
+- Data persists in the `supabase/.local` folder for next time.
 
 ## Debugging Next.js API Locally
 

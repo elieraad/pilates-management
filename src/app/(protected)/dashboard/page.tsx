@@ -55,7 +55,7 @@ export default async function DashboardPage() {
     classes?.map((d) => ({
       ...d,
       bookings_count: d.bookings_count[0].count,
-      class: Array.isArray(d.class) ? d.class[0] : d.class,
+      class: d.class
     })) || [];
 
   // Get recent bookings

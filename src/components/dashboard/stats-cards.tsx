@@ -75,7 +75,7 @@ export default async function StatsCards() {
 
   // Calculate revenue from all paid bookings
   const revenue = (financialResult.data || []).reduce(
-    (sum, booking) => sum + parseFloat(booking.amount),
+    (sum, booking) => sum + parseFloat(booking.amount + ""),
     0
   );
 

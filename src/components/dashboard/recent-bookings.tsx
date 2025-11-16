@@ -2,12 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { Table, TableRow, TableCell } from "../ui/table";
-import { BookingSession } from "@/types/booking.types";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { formatDateTime } from "@/lib/utils/date-utils";
 
 type RecentBookingsProps = {
-  bookings: BookingSession[];
+  bookings: {
+    id: string;
+    session_date: string;
+    status: string;
+    client: { name: string };
+    class_session: { class: { name: string } };
+  }[];
 };
 
 const RecentBookings = ({ bookings }: RecentBookingsProps) => {

@@ -31,7 +31,6 @@ export default async function NewBookingPage({
   }
 
   // Get session details if sessionId is provided
-  let sessionData = null;
   let classData = null;
 
   if (!searchParams.sessionId) {
@@ -42,7 +41,6 @@ export default async function NewBookingPage({
     .from("class_sessions")
     .select(
       `
-        *,
         class:class_id (*)
       `
     )
@@ -55,7 +53,6 @@ export default async function NewBookingPage({
     redirect("/bookings");
   }
 
-  sessionData = data;
   classData = data.class;
 
   // Check current bookings count if session is provided
@@ -71,7 +68,6 @@ export default async function NewBookingPage({
       <div className="bg-white p-6 rounded-xl shadow-sm">
         <BookingCreationForm
           preselectedSessionId={searchParams.sessionId}
-          sessionData={sessionData}
           classData={classData}
           currentBookings={currentBookings}
           sessionDate={searchParams.sessionDate as string}
