@@ -31,11 +31,9 @@ CREATE INDEX IF NOT EXISTS idx_bookings_client_id ON bookings(client_id);
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 
 -- Step 5: Create RLS policies for clients
-DROP POLICY IF EXISTS "Studios can manage their clients" ON clients;
 CREATE POLICY "Studios can manage their clients" ON clients
   FOR ALL USING (auth.uid() = studio_id);
 
-DROP POLICY IF EXISTS "Public can create clients" ON clients;
 CREATE POLICY "Public can create clients" ON clients
   FOR INSERT WITH CHECK (true);
 

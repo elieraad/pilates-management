@@ -73,7 +73,6 @@ CREATE INDEX IF NOT EXISTS idx_licenses_active_end_date ON licenses(studio_id, i
 ALTER TABLE licenses ENABLE ROW LEVEL SECURITY;
 
 -- CREATE policies
-DROP POLICY IF EXISTS "Studios can view their own licenses" ON licenses;
 CREATE POLICY "Studios can view their own licenses" ON licenses
   FOR SELECT USING (auth.uid() = studio_id);
 
