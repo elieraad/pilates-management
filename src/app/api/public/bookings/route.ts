@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "../../../../../middleware/rate-limiter";
+import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +15,10 @@ export async function POST(request: NextRequest) {
 
     if (rateLimited) return rateLimited;
 
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
     // Parse the request body
     const body = await request.json();
@@ -51,19 +52,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // p_class_session_id uuid,
+    // p_studio_id uuid,
+    // p_client_email text,
+    // p_client_name text,
+    // p_session_date text, -- Required for recurring sessions
+    // p_client_phone text DEFAULT NULL,
+    // p_status text DEFAULT 'confirmed',
+    // p_payment_status text DEFAULT 'unpaid',
+    // p_amount numeric DEFAULT 0
+
     // Use the stored procedure for transaction safety
     const { data: result, error: transactionError } = await supabase.rpc(
       "create_booking_with_capacity_check",
       {
         p_class_session_id: body.class_session_id,
         p_studio_id: body.studio_id,
-        p_client_name: body.client_name,
         p_client_email: body.client_email,
+        p_client_name: body.client_name,
         p_client_phone: body.client_phone || null,
         p_status: "pending",
         p_payment_status: "unpaid",
         p_amount: sessionData.class.price,
-        p_capacity: sessionData.class.capacity,
         p_session_date: body.sessionDate,
       }
     );

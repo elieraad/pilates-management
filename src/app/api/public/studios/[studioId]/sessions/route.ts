@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessions } from "@/lib/utils/recurring-sessions";
+import { getSessionsUsingClient } from "@/lib/utils/recurring-sessions";
+import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,17 @@ export async function GET(
       );
     }
 
-    const sessions = await getSessions(params.studioId, startDate, endDate);
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const sessions = await getSessionsUsingClient(
+      supabase,
+      params.studioId,
+      startDate,
+      endDate
+    );
     return NextResponse.json(sessions, { status: 200 });
   } catch (error) {
     console.error("Get public sessions error:", error);

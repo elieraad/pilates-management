@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useBookings } from "@/lib/hooks/use-bookings";
 import { useClasses } from "@/lib/hooks/use-classes";
-import { BookingStatus, BookingWithClient } from "@/types/booking.types";
+import { BookingStatus, BookingSession } from "@/types/booking.types";
 import { Table, TableRow, TableCell } from "../ui/table";
 import {
   CheckCircle,
@@ -26,7 +26,7 @@ const BookingList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showEditBookingModal, setShowEditBookingModal] = useState(false);
   const [selectedBooking, setSelectedBooking] =
-    useState<BookingWithClient | null>(null);
+    useState<BookingSession | null>(null);
   const [confirmCancelModal, setConfirmCancelModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -90,7 +90,7 @@ const BookingList = () => {
   const cancelBooking = useCancelBookingMutation();
 
   function statusMatch(
-    booking: BookingWithClient,
+    booking: BookingSession,
     statusFilter: BookingStatus
   ) {
     switch (statusFilter) {
@@ -119,8 +119,8 @@ const BookingList = () => {
       if (searchTerm.trim()) {
         const searchLower = searchTerm.toLowerCase();
         const matchesSearch =
-          booking.client_name.toLowerCase().includes(searchLower) ||
-          booking.client_email.toLowerCase().includes(searchLower) ||
+          booking.client.name.toLowerCase().includes(searchLower) ||
+          booking.client.email.toLowerCase().includes(searchLower) ||
           booking.class_session.class.name.toLowerCase().includes(searchLower);
 
         if (!matchesSearch) return false;
@@ -145,12 +145,12 @@ const BookingList = () => {
     });
   }, [bookings, searchTerm, classFilter, statusFilter, paymentFilter]);
 
-  const handleEditBooking = (booking: BookingWithClient) => {
+  const handleEditBooking = (booking: BookingSession) => {
     setSelectedBooking(booking);
     setShowEditBookingModal(true);
   };
 
-  const handleCancelBooking = (booking: BookingWithClient) => {
+  const handleCancelBooking = (booking: BookingSession) => {
     setSelectedBooking(booking);
     setConfirmCancelModal(true);
   };
@@ -163,7 +163,7 @@ const BookingList = () => {
     }
   };
 
-  const renderBookingStatus = (booking: BookingWithClient) => {
+  const renderBookingStatus = (booking: BookingSession) => {
     // Check for canceled class session
     if (booking.class_session.is_cancelled) {
       return (
@@ -359,11 +359,11 @@ const BookingList = () => {
                     }`}
                   >
                     <TableCell className="font-medium">
-                      {booking.client_name}
+                      {booking.client.name}
                     </TableCell>
                     <TableCell className="text-gray-600 text-sm">
-                      <div>{booking.client_email}</div>
-                      <div>{booking.client_phone || ""}</div>
+                      <div>{booking.client.email}</div>
+                      <div>{booking.client.phone || ""}</div>
                     </TableCell>
                     <TableCell className="text-gray-600">
                       {booking.class_session.class.name}
@@ -458,7 +458,7 @@ const BookingList = () => {
       >
         <p className="mb-4">
           Are you sure you want to cancel this booking for{" "}
-          {selectedBooking?.client_name}?
+          {selectedBooking?.client.name}?
         </p>
         <div className="flex justify-end space-x-3">
           <Button

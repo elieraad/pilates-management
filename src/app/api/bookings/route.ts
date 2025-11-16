@@ -28,12 +28,18 @@ export async function GET(request: NextRequest) {
     const endDate = url.searchParams.get("endDate");
     const classId = url.searchParams.get("classId");
 
-    // Get all bookings with their session data
+    // Get all bookings with their session and client data
     let query = supabase
       .from("bookings")
       .select(
         `
         *,
+        client:client_id (
+          id,
+          name,
+          email,
+          phone
+        ),
         class_session:class_session_id (
           *,
           class:class_id (*)
@@ -71,21 +77,21 @@ export async function GET(request: NextRequest) {
 
     await computeBookingsWithSessionDate(validBookings);
 
-    // Now get all exceptions for these sessions
+    // Filter by date range if specified
     if (validBookings.length > 0) {
       validBookings = validBookings.filter((b: Booking) => {
-        let valid = false;
+        let valid = true;
 
         if (startDate) {
           valid =
-            valid ||
+            valid &&
             new Date(b.session_date).getTime() >= new Date(startDate).getTime();
         }
 
         if (endDate) {
           valid =
-            valid ||
-            new Date(b.session_date).getTime() >= new Date(endDate).getTime();
+            valid &&
+            new Date(b.session_date).getTime() <= new Date(endDate).getTime();
         }
 
         return valid;
@@ -139,7 +145,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if class session exists and belongs to this studio
-    const { data: sessionData, error: sessionError } = await supabase
+    const { error: sessionError } = await supabase
       .from("class_sessions")
       .select(
         `
@@ -166,14 +172,13 @@ export async function POST(request: NextRequest) {
       {
         p_class_session_id: body.class_session_id,
         p_studio_id: user.id,
-        p_client_name: body.client_name,
         p_client_email: body.client_email,
-        p_client_phone: body.client_phone || null,
+        p_client_name: body.client_name,
+        p_client_phone: body.client_phone,
         p_status: body.status,
         p_payment_status: body.payment_status,
         p_amount: body.amount,
-        p_capacity: sessionData.class.capacity,
-        p_session_date: body.sessionDate || null, // Pass the session date for recurring sessions
+        p_session_date: body.sessionDate || null,
       }
     );
 
@@ -195,19 +200,42 @@ export async function POST(request: NextRequest) {
       throw transactionError;
     }
 
+    if (transactionError) {
+      return NextResponse.json(
+        { error: transactionError },
+        { status: 400 }
+      );
+    }
+
+    if (!result || result.length === 0) {
+      return NextResponse.json(
+        { error: "Booking creation failed" },
+        { status: 500 }
+      );
+    }
+
+    // Use the correct column
+    const bookingId = result[0].booking_id;
+
     // Get the newly created booking with related data
     const { data: newBooking, error: fetchError } = await supabase
       .from("bookings")
       .select(
         `
         *,
+        client:client_id (
+          id,
+          name,
+          email,
+          phone
+        ),
         class_session:class_session_id (
           *,
           class:class_id (*)
         )
       `
       )
-      .eq("id", result.id)
+      .eq("id", bookingId)
       .single();
 
     if (fetchError) {

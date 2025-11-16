@@ -22,12 +22,18 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get the booking
+    // Get the booking with client information
     const { data: booking, error } = await supabase
       .from("bookings")
       .select(
         `
         *,
+        client:client_id (
+          id,
+          name,
+          email,
+          phone
+        ),
         class_session:class_session_id (
           *,
           class:class_id (*)
@@ -85,34 +91,98 @@ export async function PUT(
       );
     }
 
-    // Check if the booking exists and belongs to the studio
-    const { error: checkError } = await supabase
+    // Get the existing booking with client info
+    const { data: existingBooking, error: fetchError } = await supabase
       .from("bookings")
-      .select("id, status, payment_status")
+      .select(
+        `
+        id,
+        client_id,
+        status,
+        payment_status,
+        client:client_id (
+          id,
+          name,
+          email,
+          phone
+        )
+      `
+      )
       .eq("id", params.id)
       .eq("studio_id", user.id)
       .single();
 
-    if (checkError) {
-      if (checkError.code === "PGRST116") {
+    if (fetchError) {
+      if (fetchError.code === "PGRST116") {
         return NextResponse.json(
           { error: "Booking not found" },
           { status: 404 }
         );
       }
-      throw checkError;
+      throw fetchError;
     }
 
     // Parse the request body
     const body = await request.json();
 
+    let clientId = existingBooking.client_id;
+    const existingClient: { name: string; email: string; phone: string } =
+      existingBooking.client[0];
+
+    // Handle client information update if provided
+    if (body.client_name || body.client_email || body.client_phone) {
+      // Check if we need to update the existing client or create a new one
+      const clientChanged =
+        body.client_name !== existingClient.name ||
+        body.client_email !== existingClient.email ||
+        body.client_phone !== existingClient.phone;
+
+      if (clientChanged) {
+        // First, check if a client with this email already exists for this studio
+        const { data: existingClient } = await supabase
+          .from("clients")
+          .select("id")
+          .eq("studio_id", user.id)
+          .eq("email", body.client_email)
+          .single();
+
+        if (existingClient) {
+          // Update the existing client
+          const { error: updateClientError } = await supabase
+            .from("clients")
+            .update({
+              name: body.client_name,
+              phone: body.client_phone || null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", existingClient.id);
+
+          if (updateClientError) throw updateClientError;
+          clientId = existingClient.id;
+        } else {
+          // Create a new client
+          const { data: newClient, error: createClientError } = await supabase
+            .from("clients")
+            .insert({
+              studio_id: user.id,
+              name: body.client_name,
+              email: body.client_email,
+              phone: body.client_phone || null,
+            })
+            .select("id")
+            .single();
+
+          if (createClientError) throw createClientError;
+          clientId = newClient.id;
+        }
+      }
+    }
+
     // Update the booking
     const { data: updatedBooking, error } = await supabase
       .from("bookings")
       .update({
-        client_name: body.client_name,
-        client_email: body.client_email,
-        client_phone: body.client_phone,
+        client_id: clientId,
         status: body.status,
         payment_status: body.payment_status,
         amount: body.amount,
@@ -123,6 +193,12 @@ export async function PUT(
       .select(
         `
         *,
+        client:client_id (
+          id,
+          name,
+          email,
+          phone
+        ),
         class_session:class_session_id (
           *,
           class:class_id (*)
