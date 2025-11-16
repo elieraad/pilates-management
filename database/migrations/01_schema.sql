@@ -33,19 +33,15 @@ CREATE INDEX IF NOT EXISTS idx_studios_email ON studios(email);
 ALTER TABLE studios ENABLE ROW LEVEL SECURITY;
 
 -- CREATE policies
-DROP POLICY IF EXISTS "Studios can view their own profile" ON studios;
 CREATE POLICY "Studios can view their own profile" ON studios
   FOR SELECT USING (auth.uid() = id);
 
-DROP POLICY IF EXISTS "Studios can update their own profile" ON studios;
 CREATE POLICY "Studios can update their own profile" ON studios
   FOR UPDATE USING (auth.uid() = id);
 
-DROP POLICY IF EXISTS "Studios can insert their own profile" ON studios;
 CREATE POLICY "Studios can insert their own profile" ON studios
   FOR INSERT WITH CHECK (auth.uid() = id);
 
-DROP POLICY IF EXISTS "Public can view studios data" ON studios;
 CREATE POLICY "Public can view studios data" ON studios
   FOR SELECT USING (true);
 
@@ -111,16 +107,14 @@ CREATE INDEX IF NOT EXISTS idx_classes_active ON classes(studio_id, is_cancelled
 ALTER TABLE classes ENABLE ROW LEVEL SECURITY;
 
 -- CREATE policies
-DROP POLICY IF EXISTS "Studios can manage their own classes" ON classes;
 CREATE POLICY "Studios can manage their own classes" ON classes
   FOR ALL USING (auth.uid() = studio_id);
 
-DROP POLICY IF EXISTS "Public can view all classes" on classes;
 CREATE POLICY "Public can view all classes" on classes
   FOR SELECT USING (true);
 
 -- Trigger for updated_at
-CREATE OR REPLACE TRIGGER set_classes_updated_at
+CREATE TRIGGER set_classes_updated_at
   BEFORE UPDATE ON classes
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
@@ -151,11 +145,9 @@ CREATE INDEX IF NOT EXISTS idx_sessions_recurring ON class_sessions(is_recurring
 ALTER TABLE class_sessions ENABLE ROW LEVEL SECURITY;
 
 -- CREATE policies
-DROP POLICY IF EXISTS "Studios can manage their own class sessions" ON class_sessions;
 CREATE POLICY "Studios can manage their own class sessions" ON class_sessions
   FOR ALL USING (auth.uid() = studio_id);
 
-DROP POLICY IF EXISTS "Public can view non-cancelled class sessions" ON class_sessions;
 CREATE POLICY "Public can view non-cancelled class sessions" ON class_sessions
   FOR SELECT USING (is_cancelled = FALSE);
 
@@ -186,11 +178,9 @@ CREATE INDEX IF NOT EXISTS idx_exceptions_studio_session_date ON session_excepti
 ALTER TABLE session_exceptions ENABLE ROW LEVEL SECURITY;
 
 -- CREATE policies
-DROP POLICY IF EXISTS "Studios can manage their own class exceptions" ON session_exceptions;
 CREATE POLICY "Studios can manage their own class exceptions" ON session_exceptions
   FOR ALL USING (auth.uid() = studio_id);
 
-DROP POLICY IF EXISTS "Public can view session exceptions" ON session_exceptions;
 CREATE POLICY "Public can view session exceptions" ON session_exceptions
   FOR SELECT USING (true);
 
@@ -232,11 +222,9 @@ CREATE INDEX IF NOT EXISTS idx_bookings_session_status ON bookings(class_session
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 
 -- CREATE policies
-DROP POLICY IF EXISTS "Studios can manage bookings for their classes" ON bookings;
 CREATE POLICY "Studios can manage bookings for their classes" ON bookings
   FOR ALL USING (auth.uid() = studio_id);
 
-DROP POLICY IF EXISTS "Public can add bookings" ON bookings;
 CREATE POLICY "Public can add bookings" ON bookings
   FOR INSERT WITH CHECK (true);
 

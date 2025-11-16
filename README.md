@@ -2,6 +2,11 @@
 
 A complete management platform for Fitness studios, built with Next.js and Supabase.
 
+## Debugging Next.js API Locally
+
+1. Open VSCode → Run and Debug → select **Next.js API** → Start Debugging.
+2. Add `debugger;` statements in your API routes to pause execution.
+
 ## Features
 
 - Studio profile management
