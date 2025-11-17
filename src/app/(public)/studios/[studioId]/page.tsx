@@ -189,6 +189,26 @@ export default function StudioPublicPage({
         throw new Error("Failed to create booking");
       }
 
+      // Update the local state to increment the booking count
+      setSessionsByClassId((prevSessions) => {
+        const updatedSessions = { ...prevSessions };
+        const classId = selectedSession.class_id;
+
+        if (updatedSessions[classId]) {
+          updatedSessions[classId] = updatedSessions[classId].map((session) => {
+            if (session.id === selectedSession.id) {
+              return {
+                ...session,
+                bookings_count: session.bookings_count + 1,
+              };
+            }
+            return session;
+          });
+        }
+
+        return updatedSessions;
+      });
+
       setBookingStep(2); // Success step
     } catch (error: unknown) {
       console.error("Booking error:", error);
