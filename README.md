@@ -72,7 +72,19 @@ npx supabase stop
 ```
 
 - Stops all local services.
-- Data persists in the `supabase/.local` folder for next time.
+
+
+## Running Redis Locally 
+
+### 1. Start redis locally
+
+```bash
+docker run -p 6380:6379 redis
+```
+
+### 2. update .env.local
+
+add KV_URL=redis://localhost:6380 to your .env.local file 
 
 ## Debugging Next.js API Locally
 
