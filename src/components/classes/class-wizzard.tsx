@@ -257,6 +257,14 @@ const ClassWizard = ({
           price: Number(classData.price),
         });
         setNewClassId(updatedClass.id);
+      } else if (newClassId) {
+        await updateClass.mutateAsync({
+          id: newClassId,
+          ...classData,
+          duration: Number(classData.duration),
+          capacity: Number(classData.capacity),
+          price: Number(classData.price),
+        });
       } else {
         // Create new class
         const newClass = await createClass.mutateAsync({
