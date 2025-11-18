@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useBookings } from "@/lib/hooks/use-bookings";
 import { useClasses } from "@/lib/hooks/use-classes";
 import { BookingStatus, BookingSession } from "@/types/booking.types";
@@ -14,6 +15,7 @@ import {
   Trash2,
   Filter,
   AlertCircle,
+  QrCode,
 } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils/date-utils";
 import Button from "../ui/button";
@@ -23,8 +25,11 @@ import BookingForm from "./booking-form";
 import { DatePicker } from "../ui/date-picker";
 import { MessageCircle } from "lucide-react";
 import Link from "next/link";
+import QRScanner from "./qr-code-scanner";
 
 const BookingList = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [showEditBookingModal, setShowEditBookingModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingSession | null>(
@@ -32,6 +37,7 @@ const BookingList = () => {
   );
   const [confirmCancelModal, setConfirmCancelModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   // Date handling for pagination
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
@@ -75,8 +81,57 @@ const BookingList = () => {
   const endOfDay = new Date(selectedDate);
   endOfDay.setHours(23, 59, 59, 999);
 
-  const { useBookingsQuery, useCancelBookingMutation } = useBookings();
+  const { useBookingsQuery, useCancelBookingMutation, useBookingQuery } =
+    useBookings();
   const { useClassesQuery } = useClasses();
+
+  // Get booking ID from URL if present
+  const bookingIdFromUrl = searchParams.get("id");
+
+  // Fetch specific booking if ID is in URL
+  const { data: bookingFromUrl, isLoading: isLoadingBookingFromUrl } =
+    useBookingQuery(bookingIdFromUrl || "");
+
+  // Auto-open edit modal when booking is loaded from URL
+  useEffect(() => {
+    if (bookingFromUrl && !showEditBookingModal) {
+      setSelectedBooking(bookingFromUrl);
+      setShowEditBookingModal(true);
+    }
+  }, [bookingFromUrl]);
+
+  // Close modal and clear URL parameter
+  const handleCloseEditModal = () => {
+    setShowEditBookingModal(false);
+    setSelectedBooking(null);
+    if (bookingIdFromUrl) {
+      router.push("/bookings");
+    }
+  };
+
+  // Handle QR code scan
+  const handleQRScan = (bookingId: string) => {
+    // Close the scanner
+    closeScanner();
+
+    // Navigate to the booking with the ID parameter
+    router.push(`/bookings?id=${bookingId}`);
+  };
+
+  // In your parent component where you conditionally render QRCodeScanner
+  const closeScanner = () => {
+    // Stop all streams before unmounting
+    document.querySelectorAll("video").forEach((video) => {
+      const stream = video.srcObject as MediaStream;
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        video.srcObject = null;
+      }
+    });
+
+    // Then hide the scanner
+    setShowQRScanner(false);
+  };
 
   // Fetch all bookings for the day
   const { data: bookings, isLoading: isLoadingBookings } = useBookingsQuery(
@@ -212,8 +267,26 @@ const BookingList = () => {
 
   return (
     <div>
+      {isLoadingBookingFromUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600 mx-auto mb-4"></div>
+            <p className="text-gray-700">Loading booking...</p>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-serif text-olive-900">Bookings</h2>
+        <Button
+          variant="primary"
+          size="sm"
+          icon={QrCode}
+          onClick={() => setShowQRScanner(true)}
+          className="shadow-md hover:shadow-lg transition-shadow"
+        >
+          <span className="hidden sm:inline">Scan QR Code</span>
+        </Button>
       </div>
 
       <div className="bg-white rounded-xl overflow-hidden shadow-sm">
@@ -438,23 +511,28 @@ const BookingList = () => {
         </div>
       </div>
 
+      {/* QR Scanner */}
+      {showQRScanner && (
+        <Modal
+          title="Scan Booking QR Code"
+          isOpen={showQRScanner}
+          onClose={() => closeScanner()}
+        >
+          <QRScanner onScanSuccess={handleQRScan} />
+        </Modal>
+      )}
+
       {/* Edit Booking Modal */}
       <Modal
         isOpen={showEditBookingModal}
-        onClose={() => setShowEditBookingModal(false)}
+        onClose={handleCloseEditModal}
         title="Edit Booking"
       >
         {selectedBooking && (
           <BookingForm
             initialData={selectedBooking}
-            onSuccess={() => {
-              setShowEditBookingModal(false);
-              setSelectedBooking(null);
-            }}
-            onCancel={() => {
-              setShowEditBookingModal(false);
-              setSelectedBooking(null);
-            }}
+            onSuccess={handleCloseEditModal}
+            onCancel={handleCloseEditModal}
           />
         )}
       </Modal>

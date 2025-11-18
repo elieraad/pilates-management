@@ -1,4 +1,4 @@
-import { ReactNode, ButtonHTMLAttributes } from "react";
+import React, { ReactNode, ButtonHTMLAttributes } from "react";
 import { LucideIcon } from "lucide-react";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
@@ -70,10 +70,10 @@ const Button = ({
           ></path>
         </svg>
       )}
-      {Icon && !isLoading && (
-        <Icon size={size === "sm" ? 16 : 20} className="mr-2" />
-      )}
-      {children}
+      <div className="flex horizontal items-center gap-1">
+        {Icon && !isLoading && <Icon size={size === "sm" ? 16 : 20} />}
+        {children}
+      </div>
     </button>
   );
 };

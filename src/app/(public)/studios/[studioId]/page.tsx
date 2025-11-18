@@ -11,11 +11,13 @@ import {
   ChevronRight,
   Check,
   Info,
+  Download,
 } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils/date-utils";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { URLSafeUUIDShortener } from "@/lib/utils/url-encodings";
+import { QRCodeSVG } from "qrcode.react";
 
 interface Studio {
   id: string;
@@ -67,6 +69,7 @@ export default function StudioPublicPage({
 
   const studioId = URLSafeUUIDShortener.decode(params.studioId);
   const [studio, setStudio] = useState<Studio | null>(null);
+  const [bookingConfirmation, setBookingConfirmation] = useState<string>();
 
   const availableDates = useMemo(() => {
     return Array.from({ length: 30 }, (_, i) => {
@@ -189,6 +192,11 @@ export default function StudioPublicPage({
         throw new Error("Failed to create booking");
       }
 
+      const { booking } = await response.json();
+
+      const bookingId = booking[0].booking_id;
+      setBookingConfirmation(bookingId);
+
       // Update the local state to increment the booking count
       setSessionsByClassId((prevSessions) => {
         const updatedSessions = { ...prevSessions };
@@ -216,6 +224,35 @@ export default function StudioPublicPage({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const downloadQRCode = () => {
+    const svg = document.getElementById("booking-qr-code");
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx?.drawImage(img, 0, 0);
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `booking-${bookingConfirmation}.png`;
+          link.click();
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+
+    img.src = "data:image/svg+xml;base64," + btoa(svgData);
   };
 
   // Get sessions for selected date grouped by class
@@ -724,6 +761,38 @@ export default function StudioPublicPage({
               </h3>
               <p className="text-gray-600 mb-6">Thank you for your booking!</p>
 
+              {/* QR Code Section */}
+              {bookingConfirmation && (
+                <div className="bg-white border border-olive-200 p-4 rounded-lg mb-6 max-w-md mx-auto">
+                  <h4 className="font-medium text-olive-900 mb-3">
+                    Your Booking QR Code
+                  </h4>
+                  <div className="flex flex-col items-center">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <QRCodeSVG
+                        id="booking-qr-code"
+                        value={bookingConfirmation}
+                        size={200}
+                        level="H"
+                        includeMargin={true}
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600 mt-3 mb-3">
+                      Show this QR code at the studio to check in
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={downloadQRCode}
+                        className="flex items-center gap-2 px-4 py-2 bg-olive-100 text-olive-700 rounded-lg hover:bg-olive-200 transition-colors text-sm"
+                      >
+                        <Download className="w-4 h-4" />
+                        Download QR Code
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {selectedSession && (
                 <div className="bg-olive-50 p-4 rounded-lg mb-6 max-w-md mx-auto text-left">
                   <h4 className="font-medium text-olive-900">
@@ -775,6 +844,7 @@ export default function StudioPublicPage({
                     email: "",
                     phone: "",
                   });
+                  setBookingConfirmation(""); // Reset confirmation
                 }}
               >
                 Book Another Class

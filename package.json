@@ -15,8 +15,10 @@
     "@upstash/redis": "^1.34.6",
     "lucide-react": "^0.485.0",
     "next": "14.2.32",
+    "qrcode.react": "^4.2.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-qr-reader": "^3.0.0-beta-1",
     "redis": "^5.9.0"
   },
   "devDependencies": {

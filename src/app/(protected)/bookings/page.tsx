@@ -6,9 +6,5 @@ export const metadata = {
 };
 
 export default function BookingsPage() {
-  return (
-    <div>
-      <BookingList />
-    </div>
-  );
+  return <BookingList />;
 }
