@@ -13,7 +13,6 @@ type ClassSessionFormProps = {
   selectedClassId?: string;
   initialDate?: Date;
   onSuccess?: () => void;
-  onCancel?: () => void;
 };
 
 const ClassSessionForm = ({
@@ -21,7 +20,6 @@ const ClassSessionForm = ({
   selectedClassId,
   initialDate,
   onSuccess,
-  onCancel,
 }: ClassSessionFormProps) => {
   const { useCreateClassSessionMutation } = useClasses();
   const createClassSession = useCreateClassSessionMutation();
@@ -467,14 +465,6 @@ const ClassSessionForm = ({
       )}
 
       <div className="flex justify-end space-x-3 pt-4 border-t mt-6">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isLoading}
-        >
-          Cancel
-        </Button>
         <Button
           type="submit"
           isLoading={isLoading}

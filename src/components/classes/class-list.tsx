@@ -708,10 +708,7 @@ const ClassList = () => {
         onClose={() => setShowAddClassModal(false)}
         title="Add New Class"
       >
-        <ClassWizard
-          onSuccess={() => setShowAddClassModal(false)}
-          onCancel={() => setShowAddClassModal(false)}
-        />
+        <ClassWizard onSuccess={() => setShowAddClassModal(false)} />
       </Modal>
 
       {/* Edit Class Modal */}
@@ -724,10 +721,6 @@ const ClassList = () => {
           <ClassWizard
             initialData={selectedClass}
             onSuccess={() => {
-              setShowEditClassModal(false);
-              setSelectedClass(null);
-            }}
-            onCancel={() => {
               setShowEditClassModal(false);
               setSelectedClass(null);
             }}
@@ -747,10 +740,6 @@ const ClassList = () => {
             selectedClassId={selectedClass.id}
             initialDate={selectedDate}
             onSuccess={() => {
-              setShowAddSessionModal(false);
-              setSelectedClass(null);
-            }}
-            onCancel={() => {
               setShowAddSessionModal(false);
               setSelectedClass(null);
             }}
