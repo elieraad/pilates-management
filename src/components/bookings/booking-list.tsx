@@ -21,12 +21,15 @@ import Modal from "../ui/modal";
 import Select from "../ui/select";
 import BookingForm from "./booking-form";
 import { DatePicker } from "../ui/date-picker";
+import { MessageCircle } from "lucide-react";
+import Link from "next/link";
 
 const BookingList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showEditBookingModal, setShowEditBookingModal] = useState(false);
-  const [selectedBooking, setSelectedBooking] =
-    useState<BookingSession | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<BookingSession | null>(
+    null
+  );
   const [confirmCancelModal, setConfirmCancelModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -49,7 +52,6 @@ const BookingList = () => {
       localStorage.setItem("selectedBookingDate", selectedDate.toISOString()),
     [selectedDate]
   );
-
 
   // Filter states (for local filtering)
   const [classFilter, setClassFilter] = useState("");
@@ -89,10 +91,7 @@ const BookingList = () => {
 
   const cancelBooking = useCancelBookingMutation();
 
-  function statusMatch(
-    booking: BookingSession,
-    statusFilter: BookingStatus
-  ) {
+  function statusMatch(booking: BookingSession, statusFilter: BookingStatus) {
     switch (statusFilter) {
       case "confirmed":
         return (
@@ -363,7 +362,17 @@ const BookingList = () => {
                     </TableCell>
                     <TableCell className="text-gray-600 text-sm">
                       <div>{booking.client.email}</div>
-                      <div>{booking.client.phone || ""}</div>
+                      {booking.client.phone && (
+                        <Link
+                          className="flex horizontal items-center gap-1 font-medium"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href={`https://wa.me/${booking.client.phone}`}
+                        >
+                          <div>{booking.client.phone}</div>
+                          <MessageCircle color="lightgreen" size={16} />
+                        </Link>
+                      )}
                     </TableCell>
                     <TableCell className="text-gray-600">
                       {booking.class_session.class.name}
