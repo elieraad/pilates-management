@@ -1,5 +1,7 @@
-import React, { useState, useRef } from "react";
-import { OnResultFunction, QrReader } from "react-qr-reader";
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import { BrowserQRCodeReader, IScannerControls } from "@zxing/browser";
 
 const QRCodeScanner = ({
   onScanSuccess,
@@ -10,21 +12,44 @@ const QRCodeScanner = ({
   const [error, setError] = useState<string>();
   const hasScannedRef = useRef(false);
 
-  const handleScan: OnResultFunction = (result, error) => {
-    if (result && !hasScannedRef.current) {
-      hasScannedRef.current = true; // Prevent further scans
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const controlsRef = useRef<IScannerControls | null>(null);
 
-      setError("");
-      const scannedText = result?.getText();
-      setScannedData(scannedText);
-      const bookingId = scannedText;
-      onScanSuccess(bookingId);
-    }
+  useEffect(() => {
+    if (!videoRef.current) return;
 
-    if (error) {
-      setError(error.message);
-    }
-  };
+    const reader = new BrowserQRCodeReader();
+
+    reader
+      .decodeFromVideoDevice(
+        undefined,
+        videoRef.current,
+        (result, err, controls) => {
+          controlsRef.current = controls;
+
+          if (result && !hasScannedRef.current) {
+            hasScannedRef.current = true;
+
+            const text = result.getText();
+            setScannedData(text);
+            setError("");
+
+            onScanSuccess(text);
+
+            controls?.stop(); // Stop scanning after success
+          }
+
+          if (err) {
+            setError(err.message);
+          }
+        }
+      )
+      .catch((e) => setError(e.message));
+
+    return () => {
+      controlsRef.current?.stop();
+    };
+  }, []);
 
   return (
     <div style={styles.container}>
@@ -35,13 +60,9 @@ const QRCodeScanner = ({
       </div>
 
       <div style={styles.scannerWrapper}>
-        <QrReader
-          onResult={handleScan}
-          constraints={{ facingMode: "environment" }}
-          containerStyle={styles.qrReader}
-          videoContainerStyle={styles.videoContainer}
-          videoStyle={styles.video}
-        />
+        <div style={styles.videoContainer}>
+          <video ref={videoRef} style={styles.video} />
+        </div>
       </div>
 
       {scannedData && (
@@ -81,9 +102,6 @@ const styles = {
     borderRadius: "8px",
     overflow: "hidden",
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-  },
-  qrReader: {
-    width: "100%",
   },
   videoContainer: {
     paddingTop: "100%",
