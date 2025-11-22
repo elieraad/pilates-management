@@ -415,38 +415,6 @@ export type Database = {
               is_new_client: boolean
             }[]
           }
-        | {
-            Args: {
-              p_amount: number
-              p_capacity: number
-              p_class_session_id: string
-              p_client_email: string
-              p_client_name: string
-              p_client_phone: string
-              p_payment_status: string
-              p_session_date: string
-              p_status: string
-              p_studio_id: string
-            }
-            Returns: {
-              amount: number
-              class_session_id: string
-              client_id: string
-              created_at: string
-              id: string
-              payment_status: string
-              session_date: string
-              status: string
-              studio_id: string
-              updated_at: string
-            }
-            SetofOptions: {
-              from: "*"
-              to: "bookings"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
       get_booking_stats: {
         Args: { date_from_param: string; studio_id_param: string }
         Returns: Database["public"]["CompositeTypes"]["booking_stats"]
