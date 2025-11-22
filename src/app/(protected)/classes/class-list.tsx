@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useClasses } from "@/lib/hooks/use-classes";
 import { Class, ClassSession } from "@/types/class.types";
-import { Search, Plus, Calendar, Users } from "lucide-react";
+import { Search, Plus, Calendar, Users, Grid } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils/date-utils";
 import Button from "@/components/ui/button";
 import Modal from "@/components/ui/modal";
@@ -17,10 +17,13 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { DailyView } from "./daily-view";
 import { ClassCard } from "@/components/classes/class-card";
 import { startOfWeek, endOfWeek } from "date-fns";
+import { WeeklyCalendarView } from "./weekly-view";
 
 const ClassList = () => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"daily" | "all-classes">("daily");
+  const [activeTab, setActiveTab] = useState<
+    "daily" | "weekly" | "all-classes"
+  >("weekly");
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddClassModal, setShowAddClassModal] = useState(false);
   const [showEditClassModal, setShowEditClassModal] = useState(false);
@@ -63,6 +66,18 @@ const ClassList = () => {
   const onAddClass = (cls: Class) => {
     setSelectedClass(cls);
     setShowAddSessionModal(true);
+  };
+
+  const onBook = (session: ClassSession) => {
+    const sessionDate = new Date(session.start_time);
+    const dateString = sessionDate.toISOString().split("T")[0];
+    router.push(
+      `/bookings/new?sessionId=${
+        session.id
+      }&sessionDate=${dateString}&time=${encodeURIComponent(
+        formatTime(session.start_time)
+      )}`
+    );
   };
 
   const confirmDeleteClass = async () => {
@@ -141,19 +156,22 @@ const ClassList = () => {
 
     return sessions.filter((session) => {
       const sessionDate = new Date(session.start_time);
-
-      if (activeTab === "daily") {
-        // Check if session is on the selected date
-        return (
-          sessionDate.getDate() === selectedDate.getDate() &&
-          sessionDate.getMonth() === selectedDate.getMonth() &&
-          sessionDate.getFullYear() === selectedDate.getFullYear() &&
-          !session.is_cancelled
-        );
-      } else if (activeTab === "all-classes") {
-        return true;
+      switch (activeTab) {
+        case "daily":
+          return (
+            sessionDate.getDate() === selectedDate.getDate() &&
+            sessionDate.getMonth() === selectedDate.getMonth() &&
+            sessionDate.getFullYear() === selectedDate.getFullYear() &&
+            !session.is_cancelled
+          );
+        case "weekly":
+          return true;
+        case "all-classes":
+          return true;
+        default:
+          const _activeTab: never = activeTab;
+          return _activeTab;
       }
-      return false;
     });
   }, [sessions, activeTab, selectedDate]);
 
@@ -275,6 +293,17 @@ const ClassList = () => {
           <div className="flex">
             <button
               className={`px-4 py-3 text-sm font-medium ${
+                activeTab === "weekly"
+                  ? "text-olive-600 border-b-2 border-olive-600"
+                  : "text-gray-500"
+              }`}
+              onClick={() => setActiveTab("weekly")}
+            >
+              <Grid className="h-4 w-4 inline-block mr-1" />
+              Weekly View
+            </button>
+            <button
+              className={`px-4 py-3 text-sm font-medium ${
                 activeTab === "daily"
                   ? "text-olive-600 border-b-2 border-olive-600"
                   : "text-gray-500"
@@ -298,8 +327,9 @@ const ClassList = () => {
           </div>
         </div>
 
-        {activeTab === "daily" && (
+        {(activeTab === "daily" || activeTab === "weekly") && (
           <DatePicker
+            mode={activeTab === "daily" ? "day" : "week"}
             date={dateInputValue}
             setSelectedDate={(x) => setSelectedDate(x)}
           />
@@ -328,7 +358,36 @@ const ClassList = () => {
             </div>
           ) : filteredClasses && filteredClasses.length > 0 ? (
             <div className="space-y-8">
-              {/* All Classes View */}
+              {activeTab === "weekly" && (
+                <WeeklyCalendarView
+                  filteredClasses={filteredClasses.filter(
+                    (cls) => sessionsByClass[cls.id]
+                  )}
+                  sessionsByClass={sessionsByClass}
+                  startOfWeek={weekStart}
+                  endOfWeek={weekEnd}
+                  onBook={onBook}
+                />
+              )}
+
+              {activeTab === "daily" && (
+                <DailyView
+                  filteredClasses={filteredClasses.filter(
+                    (cls) => sessionsByClass[cls.id]
+                  )}
+                  sessionsByClass={sessionsByClass}
+                  formattedDate={formattedDate}
+                  onBook={onBook}
+                  onAddClass={onAddClass}
+                  onEditClass={handleEditClass}
+                  onDeleteClass={handleDeleteClass}
+                  onCancelOccurrence={handleCancelOccurrence}
+                  onDeleteSeries={handleDeleteSeries}
+                  onEditSeries={handleEditSeries}
+                  onModifyOccurrence={handleModifyOccurrence}
+                />
+              )}
+
               {activeTab === "all-classes" && (
                 <div className="space-y-4">
                   {filteredClasses.map((cls) => {
@@ -347,34 +406,6 @@ const ClassList = () => {
                     );
                   })}
                 </div>
-              )}
-
-              {activeTab === "daily" && (
-                <DailyView
-                  filteredClasses={filteredClasses.filter(
-                    (cls) => sessionsByClass[cls.id]
-                  )}
-                  sessionsByClass={sessionsByClass}
-                  formattedDate={formattedDate}
-                  onBook={(session: ClassSession) => {
-                    const sessionDate = new Date(session.start_time);
-                    const dateString = sessionDate.toISOString().split("T")[0];
-                    router.push(
-                      `/bookings/new?sessionId=${
-                        session.id
-                      }&sessionDate=${dateString}&time=${encodeURIComponent(
-                        formatTime(session.start_time)
-                      )}`
-                    );
-                  }}
-                  onAddClass={onAddClass}
-                  onEditClass={handleEditClass}
-                  onDeleteClass={handleDeleteClass}
-                  onCancelOccurrence={handleCancelOccurrence}
-                  onDeleteSeries={handleDeleteSeries}
-                  onEditSeries={handleEditSeries}
-                  onModifyOccurrence={handleModifyOccurrence}
-                />
               )}
             </div>
           ) : (

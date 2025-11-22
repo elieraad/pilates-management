@@ -180,12 +180,15 @@ const BookingCreationForm = ({
             {formatDate(sessionDate) + ", " + time}
           </p>
           <p>
+            <span className="font-medium">Duration:</span>{" "}
+            {classData.duration} minutes
+          </p>
+          <p>
             <span className="font-medium">Instructor:</span>{" "}
             {classData.instructor}
           </p>
           <p>
-            <span className="font-medium">Price:</span> $
-            {classData.price}
+            <span className="font-medium">Price:</span> ${classData.price}
           </p>
           <p>
             <span className="font-medium">Availability:</span>{" "}
