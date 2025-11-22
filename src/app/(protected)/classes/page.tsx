@@ -1,4 +1,4 @@
-import ClassList from "@/components/classes/class-list";
+import ClassList from "@/app/(protected)/classes/class-list";
 
 export const metadata = {
   title: "Classes | Fitness Studio Management",
@@ -6,9 +6,5 @@ export const metadata = {
 };
 
 export default function ClassesPage() {
-  return (
-    <div>
-      <ClassList />
-    </div>
-  );
+  return <ClassList />;
 }

@@ -4,22 +4,23 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useClasses } from "@/lib/hooks/use-classes";
 import { Class, ClassSession } from "@/types/class.types";
-import { Table, TableRow, TableCell } from "../ui/table";
-import { Search, Edit, Trash2, Plus, Calendar, Users } from "lucide-react";
+import { Search, Plus, Calendar, Users } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils/date-utils";
-import Button from "../ui/button";
-import Modal from "../ui/modal";
+import Button from "@/components/ui/button";
+import Modal from "@/components/ui/modal";
 
-import ClassSessionForm from "./class-session-form";
-import ClassWizard from "./class-wizzard";
-import EditSeriesModal from "./edit-series-modal";
-import DeleteSeriesModal from "./delete-series-modal";
-import { DatePicker } from "../ui/date-picker";
-import { ActionsMenu } from "./actions-menu";
+import ClassSessionForm from "@/components/classes/class-session-form";
+import ClassWizard from "@/components/classes/class-wizard";
+import EditSeriesModal from "@/components/classes/edit-series-modal";
+import DeleteSeriesModal from "@/components/classes/delete-series-modal";
+import { DatePicker } from "@/components/ui/date-picker";
+import { DailyView } from "./daily-view";
+import { ClassCard } from "@/components/classes/class-card";
+import { startOfWeek, endOfWeek } from "date-fns";
 
 const ClassList = () => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("daily");
+  const [activeTab, setActiveTab] = useState<"daily" | "all-classes">("daily");
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddClassModal, setShowAddClassModal] = useState(false);
   const [showEditClassModal, setShowEditClassModal] = useState(false);
@@ -41,6 +42,9 @@ const ClassList = () => {
     return new Date();
   });
 
+  const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Monday start
+  const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
+
   useEffect(
     () => localStorage.setItem("selectedClassDate", selectedDate.toISOString()),
     [selectedDate]
@@ -56,7 +60,7 @@ const ClassList = () => {
     setConfirmDeleteModal(true);
   };
 
-  const handleAddSession = (cls: Class) => {
+  const onAddClass = (cls: Class) => {
     setSelectedClass(cls);
     setShowAddSessionModal(true);
   };
@@ -111,10 +115,13 @@ const ClassList = () => {
     useUpdateSessionSeriesMutation,
   } = useClasses();
 
+  const startISO = useMemo(() => weekStart.toISOString(), [weekStart]);
+  const endISO = useMemo(() => weekEnd.toISOString(), [weekEnd]);
+
   // Fetch sessions with date range
   const { data: classes, isLoading: isLoadingClasses } = useClassesQuery();
   const { data: sessions, isLoading: isLoadingSessions } =
-    useClassSessionsQuery(startOfDay.toISOString(), endOfDay.toISOString());
+    useClassSessionsQuery(startISO, endISO);
 
   // Filter classes by search term
   const filteredClasses = classes?.filter((cls) => {
@@ -143,10 +150,8 @@ const ClassList = () => {
           sessionDate.getFullYear() === selectedDate.getFullYear() &&
           !session.is_cancelled
         );
-      } else if (activeTab === "all") {
+      } else if (activeTab === "all-classes") {
         return true;
-      } else if (activeTab === "recurring") {
-        return session.is_recurring && !session.is_cancelled;
       }
       return false;
     });
@@ -256,126 +261,6 @@ const ClassList = () => {
     }
   };
 
-  // Render a single class card for All Classes view
-  const renderClassCard = (cls: Class) => (
-    <div className="bg-olive-50 p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
-      <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-olive-900 text-sm md:text-base">
-          {cls.name}
-        </h3>
-        <p className="text-xs md:text-sm text-gray-600">
-          Instructor: {cls.instructor} | Duration: {cls.duration} min |
-          Capacity: {cls.capacity} | Price: ${cls.price}
-        </p>
-        {cls.description && (
-          <p className="text-xs md:text-sm text-gray-600 mt-1">
-            {cls.description}
-          </p>
-        )}
-      </div>
-      <div className="flex space-x-2 mt-3 sm:mt-0">
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => handleAddSession(cls)}
-        >
-          Add Session
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          icon={Edit}
-          onClick={() => handleEditClass(cls)}
-        >
-          Edit
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-red-600 border-red-200 hover:bg-red-50"
-          icon={Trash2}
-          onClick={() => handleDeleteClass(cls)}
-        >
-          Delete
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderSession = (session: ClassSession, index: number) => (
-    <TableRow key={index} className="hover:bg-olive-50">
-      <TableCell>{formatDate(session.start_time)}</TableCell>
-      <TableCell>{formatTime(session.start_time)}</TableCell>
-      <TableCell>
-        {session.is_recurring ? (
-          <span className="text-olive-600 font-medium">
-            {session.recurring_pattern}
-            {session.is_exception && (
-              <span className="text-amber-600"> (Modified)</span>
-            )}
-            {!session.is_exception && session.is_recurring && (
-              <span className="text-gray-400"> (Recurring)</span>
-            )}
-          </span>
-        ) : (
-          <span className="text-gray-500">No</span>
-        )}
-      </TableCell>
-      <TableCell>
-        <span
-          className={
-            session.bookings_count >= session.class.capacity
-              ? "text-olive-600 font-medium"
-              : "text-gray-600"
-          }
-        >
-          {session.bookings_count}/{session.class.capacity}
-        </span>
-      </TableCell>
-      <TableCell>
-        {session.is_cancelled ? (
-          <span className="text-red-600 font-medium">Cancelled</span>
-        ) : (
-          <span className="text-green-600 font-medium">Active</span>
-        )}
-      </TableCell>
-      <TableCell className="text-right">
-        <div className="flex justify-end">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              const sessionDate = new Date(session.start_time);
-              const dateString = sessionDate.toISOString().split("T")[0];
-              router.push(
-                `/bookings/new?sessionId=${
-                  session.id
-                }&sessionDate=${dateString}&time=${encodeURIComponent(
-                  formatTime(session.start_time)
-                )}`
-              );
-            }}
-            disabled={
-              session.bookings_count >= session.class.capacity ||
-              session.is_cancelled
-            }
-          >
-            {session.bookings_count >= session.class.capacity ? "Full" : "Book"}
-          </Button>
-
-          {/* More Actions Dropdown with cascading menus */}
-          <ActionsMenu
-            session={session}
-            handleCancelOccurrence={handleCancelOccurrence}
-            handleDeleteSeries={handleDeleteSeries}
-            handleEditSeries={handleEditSeries}
-            handleModifyOccurrence={handleModifyOccurrence}
-          />
-        </div>
-      </TableCell>
-    </TableRow>
-  );
-
   return (
     <div>
       <div className="flex justify-between items-center">
@@ -452,84 +337,45 @@ const ClassList = () => {
                         key={cls.id}
                         className="border border-gray-100 rounded-lg overflow-hidden mb-4 shadow-sm"
                       >
-                        {renderClassCard(cls)}
+                        <ClassCard
+                          cls={cls}
+                          onAddClass={onAddClass}
+                          onDeleteClass={handleDeleteClass}
+                          onEditClass={handleEditClass}
+                        />
                       </div>
                     );
                   })}
                 </div>
               )}
 
-              {/* Daily View: Only show classes that have sessions on the selected date */}
-              {activeTab === "daily" &&
-                Object.keys(sessionsByClass).length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">
-                      No classes scheduled for {formattedDate}
-                    </p>
-                    <Button
-                      variant="secondary"
-                      onClick={() => setShowAddClassModal(true)}
-                      className="mt-4"
-                    >
-                      Add a class
-                    </Button>
-                  </div>
-                )}
-
-              {activeTab === "daily" &&
-                filteredClasses
-                  .filter(
-                    (cls) =>
-                      // For daily view, only show classes with sessions on the selected date
-                      activeTab !== "daily" || sessionsByClass[cls.id]
-                  )
-                  .map((cls) => (
-                    <div
-                      key={cls.id}
-                      className="border border-gray-100 rounded-lg overflow-hidden"
-                    >
-                      {renderClassCard(cls)}
-
-                      {/* Class Sessions */}
-                      <div className="p-4">
-                        {!sessionsByClass[cls.id] ||
-                        sessionsByClass[cls.id].length === 0 ? (
-                          <div className="text-center py-4">
-                            <p className="text-gray-500">
-                              No sessions scheduled
-                            </p>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="mt-2"
-                              onClick={() => handleAddSession(cls)}
-                            >
-                              Add Session
-                            </Button>
-                          </div>
-                        ) : (
-                          <Table
-                            headers={[
-                              "Date",
-                              "Time",
-                              "Recurring",
-                              "Bookings",
-                              "Status",
-                              "Actions",
-                            ]}
-                          >
-                            {sessionsByClass[cls.id]
-                              .sort(
-                                (a, b) =>
-                                  new Date(a.start_time).getTime() -
-                                  new Date(b.start_time).getTime()
-                              )
-                              .map((session, i) => renderSession(session, i))}
-                          </Table>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+              {activeTab === "daily" && (
+                <DailyView
+                  filteredClasses={filteredClasses.filter(
+                    (cls) => sessionsByClass[cls.id]
+                  )}
+                  sessionsByClass={sessionsByClass}
+                  formattedDate={formattedDate}
+                  onBook={(session: ClassSession) => {
+                    const sessionDate = new Date(session.start_time);
+                    const dateString = sessionDate.toISOString().split("T")[0];
+                    router.push(
+                      `/bookings/new?sessionId=${
+                        session.id
+                      }&sessionDate=${dateString}&time=${encodeURIComponent(
+                        formatTime(session.start_time)
+                      )}`
+                    );
+                  }}
+                  onAddClass={onAddClass}
+                  onEditClass={handleEditClass}
+                  onDeleteClass={handleDeleteClass}
+                  onCancelOccurrence={handleCancelOccurrence}
+                  onDeleteSeries={handleDeleteSeries}
+                  onEditSeries={handleEditSeries}
+                  onModifyOccurrence={handleModifyOccurrence}
+                />
+              )}
             </div>
           ) : (
             <div className="text-center py-8">

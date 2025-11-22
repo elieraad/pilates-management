@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useBookings } from "@/lib/hooks/use-bookings";
 import { useClasses } from "@/lib/hooks/use-classes";
 import { BookingStatus, BookingSession } from "@/types/booking.types";
-import { Table, TableRow, TableCell } from "../ui/table";
+import { Table, TableRow, TableCell } from "@/components/ui/table";
 import {
   CheckCircle,
   Clock,
@@ -18,14 +18,14 @@ import {
   QrCode,
 } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils/date-utils";
-import Button from "../ui/button";
-import Modal from "../ui/modal";
-import Select from "../ui/select";
-import BookingForm from "./booking-form";
-import { DatePicker } from "../ui/date-picker";
+import Button from "@/components/ui/button";
+import Modal from "@/components/ui/modal";
+import Select from "@/components/ui/select";
+import BookingForm from "@/components/bookings/booking-form";
+import { DatePicker } from "@/components/ui/date-picker";
 import { MessageCircle } from "lucide-react";
 import Link from "next/link";
-import QRScanner from "./qr-code-scanner";
+import QRScanner from "@/components/bookings/qr-code-scanner";
 
 const BookingList = () => {
   const router = useRouter();

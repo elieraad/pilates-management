@@ -1,4 +1,4 @@
-import BookingList from "@/components/bookings/booking-list";
+import BookingList from "@/app/(protected)/bookings/booking-list";
 
 export const metadata = {
   title: "Bookings | Fitness Studio Management",
