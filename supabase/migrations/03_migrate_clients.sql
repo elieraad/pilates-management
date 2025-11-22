@@ -113,6 +113,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION IF EXISTS create_booking_with_capacity_check(
+  uuid,
+  uuid,
+  text,
+  text,
+  text,
+  text,
+  text,
+  numeric,
+  integer,
+  text
+);
+
 -- Step 8: Enhanced booking creation function
 CREATE OR REPLACE FUNCTION create_booking_with_capacity_check(
   p_class_session_id uuid,

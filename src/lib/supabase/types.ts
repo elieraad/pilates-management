@@ -7,30 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -396,25 +376,24 @@ export type Database = {
         Args: { p_session_date?: string; p_session_id: string }
         Returns: number
       }
-      create_booking_with_capacity_check:
-        | {
-            Args: {
-              p_amount?: number
-              p_class_session_id: string
-              p_client_email: string
-              p_client_name: string
-              p_client_phone?: string
-              p_payment_status?: string
-              p_session_date: string
-              p_status?: string
-              p_studio_id: string
-            }
-            Returns: {
-              booking_id: string
-              client_id: string
-              is_new_client: boolean
-            }[]
-          }
+      create_booking_with_capacity_check: {
+        Args: {
+          p_amount?: number
+          p_class_session_id: string
+          p_client_email: string
+          p_client_name: string
+          p_client_phone?: string
+          p_payment_status?: string
+          p_session_date: string
+          p_status?: string
+          p_studio_id: string
+        }
+        Returns: {
+          booking_id: string
+          client_id: string
+          is_new_client: boolean
+        }[]
+      }
       get_booking_stats: {
         Args: { date_from_param: string; studio_id_param: string }
         Returns: Database["public"]["CompositeTypes"]["booking_stats"]
@@ -565,11 +544,7 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
 } as const
-
