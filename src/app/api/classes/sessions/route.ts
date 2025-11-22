@@ -96,6 +96,7 @@ export async function POST(request: NextRequest) {
       class_id: body.class_id,
       studio_id: user.id,
       start_time: body.start_time,
+      recurring_end_date: body.recurring_end_date,
       is_recurring: body.is_recurring || false,
       recurring_pattern: body.is_recurring
         ? body.recurring_pattern || "weekly"

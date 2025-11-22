@@ -8,9 +8,16 @@ export function generateOccurrences(
   rangeStart: Date,
   rangeEnd: Date,
   pattern: string,
-  customOptions: RecurrenceOptions
+  customOptions: RecurrenceOptions,
+  recurrenceEndDate?: Date
 ): Date[] {
   const occurrences: Date[] = [];
+
+  // Use the earlier of rangeEnd or recurrenceEndDate
+  const effectiveEndDate =
+    recurrenceEndDate && recurrenceEndDate < rangeEnd
+      ? recurrenceEndDate
+      : rangeEnd;
 
   // For standard patterns
   if (pattern !== "custom") {
@@ -39,7 +46,7 @@ export function generateOccurrences(
     }
 
     // Generate remaining occurrences in the range
-    while (current <= rangeEnd) {
+    while (current <= effectiveEndDate) {
       occurrences.push(new Date(current));
 
       const next = new Date(current);
@@ -58,7 +65,7 @@ export function generateOccurrences(
           break;
       }
 
-      if (next > rangeEnd) break;
+      if (next > effectiveEndDate) break;
       current = next;
     }
   }
@@ -70,12 +77,10 @@ export function generateOccurrences(
   ) {
     const daysOfWeek = customOptions.daysOfWeek;
 
-    // Start from the range start date
     const current = new Date(rangeStart);
     current.setHours(0, 0, 0, 0);
 
-    // Check each day in the range
-    while (current <= rangeEnd) {
+    while (current <= effectiveEndDate) {
       const dayOfWeek = current.getDay();
 
       // If this day of week is in our pattern
@@ -180,7 +185,10 @@ export async function getSessionsUsingClient(
       new Date(startDate),
       new Date(endDate),
       session.recurring_pattern,
-      session.custom_recurrence
+      session.custom_recurrence,
+      session.recurring_end_date
+        ? new Date(session.recurring_end_date)
+        : undefined
     );
 
     // Map exceptions for this session for quick lookup

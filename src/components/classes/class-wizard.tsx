@@ -264,12 +264,15 @@ const ClassWizard = ({
       await Promise.all(
         sessions.map(async (s) => {
           const startDateTime = new Date(`${s.start_date}T${s.start_time}`);
+          const endDateTime = new Date(
+            `${s.recurrence_options.endDate}T${s.start_time}`
+          );
           await createSession.mutateAsync({
             class_id: classId,
             start_time: startDateTime.toISOString(),
             is_recurring: s.is_recurring,
             recurring_pattern: s.recurrence_options.pattern,
-            recurring_end_date: s.recurrence_options.endDate || undefined,
+            recurring_end_date: endDateTime.toISOString() || undefined,
             custom_recurrence:
               s.recurrence_options.pattern === "custom"
                 ? s.recurrence_options

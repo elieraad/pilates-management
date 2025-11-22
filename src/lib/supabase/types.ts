@@ -103,6 +103,7 @@ export type Database = {
           id: string
           is_cancelled: boolean
           is_recurring: boolean
+          recurring_end_date: string | null
           recurring_pattern: string | null
           start_time: string
           studio_id: string
@@ -115,6 +116,7 @@ export type Database = {
           id?: string
           is_cancelled?: boolean
           is_recurring?: boolean
+          recurring_end_date?: string | null
           recurring_pattern?: string | null
           start_time: string
           studio_id: string
@@ -127,6 +129,7 @@ export type Database = {
           id?: string
           is_cancelled?: boolean
           is_recurring?: boolean
+          recurring_end_date?: string | null
           recurring_pattern?: string | null
           start_time?: string
           studio_id?: string
@@ -393,24 +396,57 @@ export type Database = {
         Args: { p_session_date?: string; p_session_id: string }
         Returns: number
       }
-      create_booking_with_capacity_check: {
-        Args: {
-          p_amount?: number
-          p_class_session_id: string
-          p_client_email: string
-          p_client_name: string
-          p_client_phone?: string
-          p_payment_status?: string
-          p_session_date: string
-          p_status?: string
-          p_studio_id: string
-        }
-        Returns: {
-          booking_id: string
-          client_id: string
-          is_new_client: boolean
-        }[]
-      }
+      create_booking_with_capacity_check:
+        | {
+            Args: {
+              p_amount?: number
+              p_class_session_id: string
+              p_client_email: string
+              p_client_name: string
+              p_client_phone?: string
+              p_payment_status?: string
+              p_session_date: string
+              p_status?: string
+              p_studio_id: string
+            }
+            Returns: {
+              booking_id: string
+              client_id: string
+              is_new_client: boolean
+            }[]
+          }
+        | {
+            Args: {
+              p_amount: number
+              p_capacity: number
+              p_class_session_id: string
+              p_client_email: string
+              p_client_name: string
+              p_client_phone: string
+              p_payment_status: string
+              p_session_date: string
+              p_status: string
+              p_studio_id: string
+            }
+            Returns: {
+              amount: number
+              class_session_id: string
+              client_id: string
+              created_at: string
+              id: string
+              payment_status: string
+              session_date: string
+              status: string
+              studio_id: string
+              updated_at: string
+            }
+            SetofOptions: {
+              from: "*"
+              to: "bookings"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       get_booking_stats: {
         Args: { date_from_param: string; studio_id_param: string }
         Returns: Database["public"]["CompositeTypes"]["booking_stats"]

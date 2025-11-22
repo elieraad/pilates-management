@@ -211,6 +211,10 @@ const ClassSessionForm = ({
             `${session.start_date}T${session.start_time}`
           );
 
+          const endDateTime = new Date(
+            `${session.recurrence_options.endDate}T${session.start_time}`
+          );
+
           await createClassSession.mutateAsync({
             class_id: formData.class_id,
             start_time: startDateTime.toISOString(),
@@ -220,7 +224,7 @@ const ClassSessionForm = ({
               : undefined,
             recurring_end_date:
               session.is_recurring && session.recurrence_options.endDate
-                ? session.recurrence_options.endDate
+                ? endDateTime.toISOString()
                 : undefined,
             custom_recurrence:
               session.is_recurring &&

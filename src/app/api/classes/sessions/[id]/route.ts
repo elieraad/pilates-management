@@ -97,16 +97,24 @@ export async function PUT(
     const body = await request.json();
 
     const startTime = new Date(currentSession.start_time);
+    const endTime =
+      (currentSession.recurring_end_date && new Date(currentSession.recurring_end_date)) || null;
     if (body.start_time) {
       const newDate = new Date(body.start_time);
       startTime.setHours(newDate.getHours());
       startTime.setMinutes(newDate.getMinutes());
+
+      if (endTime) {
+        endTime.setHours(newDate.getHours());
+        endTime.setMinutes(newDate.getMinutes());
+      }
     }
     // Update the recurring session
     const { error: updateError } = await supabase
       .from("class_sessions")
       .update({
         start_time: startTime.toISOString(),
+        recurring_end_date: endTime?.toISOString(),
       })
       .eq("id", params.id)
       .eq("studio_id", user.id);
