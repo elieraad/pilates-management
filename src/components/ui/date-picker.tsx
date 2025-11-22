@@ -1,48 +1,108 @@
+"use client";
+
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Button from "./button";
 
+type DatePickerMode = "day" | "week";
+
+interface DatePickerProps {
+  date: string;
+  setSelectedDate: (newDate: Date | ((prev: Date) => Date)) => void;
+
+  mode?: DatePickerMode;
+
+  // Configurability
+  showDatePicker?: boolean;
+  customPicker?: React.ReactNode;
+
+  showPrevNextButtons?: boolean;
+  showTodayButton?: boolean;
+
+  prevLabel?: string;
+  nextLabel?: string;
+  todayLabel?: string;
+}
+
 export const DatePicker = ({
   date,
   setSelectedDate,
-}: {
-  date: string;
-  setSelectedDate: (newDate: Date | ((prevDate: Date) => Date)) => void;
-}) => {
+  mode = "day",
+
+  showDatePicker = true,
+  customPicker,
+
+  showPrevNextButtons = true,
+  showTodayButton = true,
+
+  prevLabel = "Previous",
+  nextLabel = "Next",
+  todayLabel = "Today",
+}: DatePickerProps) => {
   const datePickerRef = useRef<HTMLDivElement>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
-  const goToPreviousDay = () => {
-    setSelectedDate((prevDate) => {
-      const newDate = new Date(prevDate);
-      newDate.setDate(newDate.getDate() - 1);
-      return newDate;
+
+  // Step logic (day = 1, week = 7)
+  const step = mode === "day" ? 1 : 7;
+
+  const goToPrevious = () => {
+    setSelectedDate((prev) => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() - step);
+      return d;
     });
   };
 
-  const goToNextDay = () => {
-    setSelectedDate((prevDate) => {
-      const newDate = new Date(prevDate);
-      newDate.setDate(newDate.getDate() + 1);
-      return newDate;
+  const goToNext = () => {
+    setSelectedDate((prev) => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() + step);
+      return d;
     });
   };
 
-  const goToToday = () => {
-    setSelectedDate(new Date());
-  };
+  const goToToday = () => setSelectedDate(new Date());
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(new Date(e.target.value));
     setDatePickerOpen(false);
   };
 
-  const formattedDate = new Date(date).toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  // Label formatting depending on mode
+  const formatLabel = (date: Date, mode: DatePickerMode) => {
+    if (mode === "day") {
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
 
+    if (mode === "week") {
+      const start = new Date(date);
+      const end = new Date(date);
+
+      // Week starts on Sunday (or adjust as needed)
+      start.setDate(start.getDate() - start.getDay());
+      end.setDate(start.getDate() + 6);
+
+      return `${start.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })} – ${end.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })}`;
+    }
+
+    return "";
+  };
+
+  const formattedDate = formatLabel(new Date(date), mode);
+
+  // Close on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -65,29 +125,37 @@ export const DatePicker = ({
   return (
     <div className="p-2 sm:p-4 bg-olive-50 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2 sm:gap-0">
       <div className="flex w-full sm:w-auto justify-between sm:justify-start gap-2">
-        <Button
-          variant="ghost"
-          onClick={goToPreviousDay}
-          icon={ChevronLeft}
-          size="sm"
-        >
-          Previous
-        </Button>
+        {/* PREV / NEXT BUTTONS */}
+        {showPrevNextButtons && (
+          <>
+            <Button
+              variant="ghost"
+              onClick={goToPrevious}
+              icon={ChevronLeft}
+              size="sm"
+            >
+              {prevLabel}
+            </Button>
 
-        <Button variant="secondary" size="sm" onClick={goToToday}>
-          Today
-        </Button>
+            {showTodayButton && (
+              <Button variant="secondary" size="sm" onClick={goToToday}>
+                {todayLabel}
+              </Button>
+            )}
 
-        <Button
-          variant="ghost"
-          onClick={goToNextDay}
-          icon={ChevronRight}
-          size="sm"
-        >
-          Next
-        </Button>
+            <Button
+              variant="ghost"
+              onClick={goToNext}
+              icon={ChevronRight}
+              size="sm"
+            >
+              {nextLabel}
+            </Button>
+          </>
+        )}
       </div>
 
+      {/* DATE LABEL + PICKER */}
       <div className="relative" ref={datePickerRef}>
         <Button
           variant="ghost"
@@ -98,20 +166,22 @@ export const DatePicker = ({
           {formattedDate}
         </Button>
 
-        {datePickerOpen && (
+        {datePickerOpen && showDatePicker && (
           <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white shadow-md rounded-md p-2 z-10 w-max">
-            <input
-              type="date"
-              value={date}
-              onChange={handleDateChange}
-              onInput={(e) => {
-                const target = e.target as HTMLInputElement;
-                if (!target.value) {
-                  target.value = date; // Reset if cleared
-                }
-              }}
-              className="p-2 border rounded w-full focus:outline-none focus:ring-2 focus:ring-olive-200"
-            />
+            {customPicker ? (
+              customPicker
+            ) : (
+              <input
+                type="date"
+                value={date}
+                onChange={handleDateChange}
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (!target.value) target.value = date;
+                }}
+                className="p-2 border rounded w-full focus:outline-none focus:ring-2 focus:ring-olive-200"
+              />
+            )}
           </div>
         )}
       </div>
