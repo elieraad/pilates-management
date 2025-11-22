@@ -3,7 +3,7 @@
 
 -- Step 1: Create the clients table
 CREATE TABLE IF NOT EXISTS clients (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   studio_id UUID REFERENCES studios(id) NOT NULL,
   email TEXT NOT NULL,
   name TEXT NOT NULL,

@@ -1,5 +1,6 @@
 -- Base schema creation
 -- This file defines the initial tables structure with appropriate indexes
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Helper function for updated_at timestamps
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
@@ -53,7 +54,7 @@ CREATE OR REPLACE TRIGGER set_studios_updated_at
 
 -- Licenses table
 CREATE TABLE IF NOT EXISTS licenses (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   studio_id UUID REFERENCES studios(id) NOT NULL,
   license_type TEXT NOT NULL CHECK (license_type IN ('monthly', 'yearly')),
   start_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -84,7 +85,7 @@ CREATE OR REPLACE TRIGGER set_licenses_updated_at
 
 -- Classes table
 CREATE TABLE IF NOT EXISTS classes (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   studio_id UUID REFERENCES studios(id) NOT NULL,
   name TEXT NOT NULL,
   description TEXT,
@@ -120,7 +121,7 @@ CREATE TRIGGER set_classes_updated_at
 
 -- Class Sessions table
 CREATE TABLE IF NOT EXISTS class_sessions (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   class_id UUID REFERENCES classes(id) NOT NULL,
   studio_id UUID REFERENCES studios(id) NOT NULL,
   start_time TIMESTAMPTZ NOT NULL,
@@ -158,7 +159,7 @@ CREATE OR REPLACE TRIGGER set_class_sessions_updated_at
 
 -- Session Exceptions table
 CREATE TABLE IF NOT EXISTS session_exceptions (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   recurring_session_id UUID REFERENCES class_sessions(id) NOT NULL,
   studio_id UUID REFERENCES studios(id) NOT NULL,
   original_date TIMESTAMPTZ NOT NULL, -- The original date this would have occurred
@@ -191,7 +192,7 @@ CREATE OR REPLACE TRIGGER set_session_exceptions_updated_at
 
 -- Bookings table
 CREATE TABLE IF NOT EXISTS bookings (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   class_session_id UUID REFERENCES class_sessions(id) NOT NULL,
   studio_id UUID REFERENCES studios(id) NOT NULL,
   client_name TEXT NOT NULL,
